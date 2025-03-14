@@ -1,15 +1,10 @@
 // import { Request } from 'express';
-import { IUser } from "./config/interface";
-export {};
+import { INhanVien, IDocGia } from "./config/interface";
+export { };
 declare global {
-  namespace Express {
-    interface Request {
-      user?: IUser;
+    namespace Express {
+        interface Request {
+            user?: INhanVien | IDocGia;
+        }
     }
-  }
-
-  interface IError {
-    status?: number;
-    message?: string;
-  }
 }
