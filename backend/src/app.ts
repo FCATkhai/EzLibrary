@@ -1,8 +1,7 @@
 import express from 'express';
 import cookiesParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import nhanVienRoutes from './routes/nhanVien.routes';
-import docGiaRoutes from './routes/docGia.routes';
+import routes from './routes/index.routes';
 
 import cors from 'cors';
 
@@ -15,12 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookiesParser());
 
-app.use('/api/nhan-vien', nhanVienRoutes);
-app.use('/api/doc-gia', docGiaRoutes);
-
-
-
-
+app.use('/api', routes);
 
 // Use Middleware
 app.use(errorHandler);

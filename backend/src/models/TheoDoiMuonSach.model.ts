@@ -7,9 +7,11 @@ const TheoDoiMuonSachSchema = new Schema<ITheoDoiMuonSach>({
     maNV: { type: String, required: true, ref: "NhanVien" },
     maSach: { type: String, required: true, ref: "Sach" },
     ngayMuon: { type: Date, required: true },
+    ngayHenTra: {type: Date},
     ngayTra: { type: Date },
-    trangThai: { type: String, enum: ["pending", "borrowing", "returned"], default: "pending"}
-});
+    trangThai: { type: String, enum: ["pending", "borrowing", "returned", "rejected"], default: "pending"}
+}, {timestamps: true}
+);
 
 const TheoDoiMuonSach: Model<ITheoDoiMuonSach> = mongoose.model<ITheoDoiMuonSach>('TheoDoiMuonSach', TheoDoiMuonSachSchema);
 export default TheoDoiMuonSach;

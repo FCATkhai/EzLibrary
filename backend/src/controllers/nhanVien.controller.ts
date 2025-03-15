@@ -65,7 +65,7 @@ export const loginNhanVien = async (req: Request, res: Response, next: NextFunct
 
         // Tạo token JWT
         const token = jwt.sign(
-            { maNV: nhanVien.maNV }, 
+            { maNV: nhanVien.maNV, role: nhanVien.chucVu }, 
             process.env.JWT_SECRET as jwt.Secret, 
             {expiresIn: process.env.JWT_EXPIRES_IN,} as jwt.SignOptions);
 

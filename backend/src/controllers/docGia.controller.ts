@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import DocGia from "../models/DocGia.model";
 import { nanoid } from "nanoid";
-
+import { USER_ROLES } from "../config/constants";
 /**
  *  Đăng ký độc giả mới
  *  @route POST /api/doc-gia/register
@@ -63,7 +63,7 @@ export const loginDocGia = async (req: Request, res: Response, next: NextFunctio
 
         // Tạo token JWT
         const token = jwt.sign(
-            { maDG: docGia.maDG }, 
+            { maDG: docGia.maDG, role: USER_ROLES.DOCGIA }, 
             process.env.JWT_SECRET as jwt.Secret,
             {expiresIn: "7d",} as jwt.SignOptions);
 

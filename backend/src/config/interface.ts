@@ -2,8 +2,7 @@ import { Document } from "mongoose";
 import { Request } from "express";
 
 export interface IUser extends Document {
-    userType: string;
-    chucVu?: string;
+    role: string;
 }
 //---------------------
 export interface INhanVien extends IUser {
@@ -33,11 +32,11 @@ export interface INhaXuatBan extends Document {
 export interface ISach extends Document {
     maSach: string;
     tenSach: string;
-    donGia: number;
     soQuyen: number;
     namXuatBan: number;
     maNXB: string;
     tacGia: string;
+    coverUrl: string;
 }
 
 
@@ -47,6 +46,7 @@ export interface ITheoDoiMuonSach extends Document {
     maNV: string;
     maSach: string;
     ngayMuon: Date;
+    ngayHenTra?: Date;
     ngayTra?: Date;
     trangThai: string;
 }
@@ -54,7 +54,4 @@ export interface ITheoDoiMuonSach extends Document {
 
 export interface IUploadRequest extends Request {
     file?: Express.Multer.File;
-    files?: { [fieldname: string]: Express.Multer.File[] };
-    imageUrls?: Record<string, string>;
-    folderName: string;
 }

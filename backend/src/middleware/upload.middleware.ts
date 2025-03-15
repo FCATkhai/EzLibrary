@@ -4,6 +4,9 @@ import { NextFunction, Response, Request } from "express";
 import { IUploadRequest } from "../config/interface";
 import multer from 'multer';
 import fs from "fs";
+import path from "path";
+import Sach from "../models/Sach.model";
+import NhaXuatBan from "../models/NhaXuatBan.model";
 
 dotenv.config();
 
@@ -13,9 +16,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './uploads/'); // Temporary storage folder
+        cb(null, uploadDir); // Temporary storage folder
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
@@ -28,29 +36,41 @@ const cloudinaryUploadImage = async (filePath: string, folderName: string) => {
     return await cloudinary.uploader.upload(
         filePath,
         {
-            folder: `ZippyFood/${folderName}`,
+            folder: `EzLibrary/${folderName}`,
             resource_type: "auto",
-            transformation: [{ width: 500, height: 500, crop: "limit" }],
+            transformation: [{ width: 300, height: 450, crop: "limit" }],
         },
     )
 };
 
-// Middleware to upload a single image
-// before upload must declare upload.single('file') in route and folderName in req
-// uploaded image url will be stored in req.file.path
-const uploadImageMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+// Middleware để upload bìa sách
+// trước khi upload cần sử dụng upload.single('file') trong route
+// ảnh sau khi upload được lưu trong req.file.path
+const uploadBookCover = async (req: Request, res: Response, next: NextFunction) => {
     const uploadReq = req as IUploadRequest;
+    
     try {
+        const { tenSach, maNXB } = req.body;
+        const SachExists = await Sach.findOne({ tenSach });
+        if (SachExists) {
+            res.status(400);
+            throw new Error("Sách đã tồn tại");
+        }
+        const NXBExists = await NhaXuatBan.findOne({maNXB});
+        if (!NXBExists) {
+            res.status(404);
+            throw new Error("Nhà xuất bản không tồn tại");
+        }
+
         if (uploadReq.file) {
             const filePath = uploadReq.file.path;
-            const folderName = uploadReq.folderName || "default";
+            const folderName = "book-cover";
             const uploader = (path: string) => cloudinaryUploadImage(path, folderName);
             const uploadResult = await uploader(filePath);
+            
+            // xoá ảnh sau khi upload
             fs.unlinkSync(filePath);
             uploadReq.file.path = uploadResult.secure_url;
-        } else {
-            res.status(400);
-            throw new Error("File not found");
         }
 
         next();
@@ -59,110 +79,22 @@ const uploadImageMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 };
 
-// Middleware to upload multiple images
-// before upload must declare upload.fields([...]) in route and folderName in req
-// example: paste to app.ts
-// import { upload, uploadMultipleImagesMiddleware } from './middleware/upload';
-
-// const uploadFields = upload.fields([
-//     { name: 'avatar', maxCount: 1 }, // Single avatar image
-//     { name: 'cover', maxCount: 1 },  // Single cover image
-//     // Add more fields as needed, e.g., { name: 'gallery', maxCount: 10 }
-// ]);
-// import { Response, NextFunction } from 'express';
-// import { IUploadRequest } from './config/interface';
-// app.post('/upload/profile', (req: IUploadRequest, res: Response, next: NextFunction) => {
-//     req.folderName = 'profile_pics';
-//     next();
-// }, uploadFields, uploadMultipleImagesMiddleware, (req: IUploadRequest, res: Response) => {
-//     console.log(req.files);
-//     console.log(req.imageUrls);
-//     if (req.imageUrls) {
-//         res.json({ imageUrls: req.imageUrls });
-//     } else {
-//         res.status(400).json({ error: 'No images provided' });
-//     }
-// });
-// app.post('/upload', (req: IUploadRequest, res: Response, next: NextFunction) => {
-//     req.folderName = req.body.folderName || req.query.folderName || 'default';
-//     next();
-//   }, uploadFields, uploadImagesMiddleware, (req: IUploadRequest, res: Response) => {
-//     if (req.imageUrls) {
-//       res.json({ imageUrls: req.imageUrls });
-//     } else {
-//       res.status(400).json({ error: 'No images provided' });
-//     }
-//   });
-
-const uploadMultipleImagesMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const uploadReq = req as IUploadRequest;
-    try {
-        const folderName = uploadReq.folderName || 'default';
-        const uploader = (filePath: string) => cloudinaryUploadImage(filePath, folderName);
-
-        if (uploadReq.files && typeof uploadReq.files === 'object') {
-            const uploadPromises: Promise<{ fieldname: string; url: string }>[] = [];
-
-            // Iterate over each field name (e.g., 'avatar', 'cover')
-            for (const fieldname in uploadReq.files) {
-                const files = uploadReq.files[fieldname]; // Array of files for this field
-                files.forEach((file) => {
-                    uploadPromises.push(
-                        uploader(file.path).then((uploadResult) => {
-                            // Cleanup after upload
-                            fs.unlinkSync(file.path);
-                            return { fieldname, url: uploadResult.secure_url };
-                        })
-                    );
-                });
-            }
-
-            const results = await Promise.all(uploadPromises);
-            uploadReq.imageUrls = {};
-            for (const { fieldname, url } of results) {
-                uploadReq.imageUrls[fieldname] = url;
-            }
-        }
-
-        next();
-    } catch (error) {
-        // Cleanup on error
-        if (uploadReq.files && typeof uploadReq.files === 'object') {
-            for (const fieldname in uploadReq.files) {
-                const files = uploadReq.files[fieldname];
-                files.map((file) => fs.unlinkSync(file.path));
-            }
-        }
-        next(error);
-    }
+const extractPublicId = (link: string) => {
+    const dottedParts = link.split('/').pop()!.split('.');
+    dottedParts.pop();
+    return dottedParts.join('.');
 };
 
-// req.files example:
-// [Object: null prototype] {
-//     avatar: [
-//       {
-//         fieldname: 'avatar',
-//         originalname: 'Screenshot 2025-01-15 122542.jpg',
-//         encoding: '7bit',
-//         mimetype: 'image/jpeg',
-//         destination: './uploads/',
-//         filename: '1741342926241-Screenshot 2025-01-15 122542.jpg',
-//         path: 'uploads\\1741342926241-Screenshot 2025-01-15 122542.jpg',
-//         size: 92840
-//       }
-//     ],
-//     cover: [
-//       {
-//         fieldname: 'cover',
-//         originalname: 'Screenshot 2025-01-06 131907.jpg',
-//         encoding: '7bit',
-//         mimetype: 'image/jpeg',
-//         destination: './uploads/',
-//         filename: '1741342926243-Screenshot 2025-01-06 131907.jpg',
-//         path: 'uploads\\1741342926243-Screenshot 2025-01-06 131907.jpg',
-//         size: 23804
-//       }
-//     ]
-//   }
+const deleteImage = async (link: string = "") => {
+    if (link != "") {
+        const { result } = await cloudinary.uploader.destroy(extractPublicId(link));
+        if (result !== "ok") {
+            console.error("Error: Lỗi khi xoá ảnh");
+        }
+    } else {
+        console.error("không có link khi xoá ảnh");
+    }
+    
+}
 
-export { upload, uploadImageMiddleware, uploadMultipleImagesMiddleware };
+export { upload, uploadBookCover, deleteImage };

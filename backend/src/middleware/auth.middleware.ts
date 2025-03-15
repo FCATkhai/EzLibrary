@@ -35,9 +35,9 @@ export const authenticateDG = async (req: Request, res: Response, next: NextFunc
 };
 
 // Middleware xác thực & kiểm tra quyền hạn
-// Nếu requireManager = false → Chỉ cần đăng nhập.
-// Nếu requireManager = true → Chỉ quản lý mới có quyền.
-export const authorize = (requireManager: boolean = false) => {
+// allowedRoles là mảng chứa những người dùng được truy cập, 
+// nếu không pass giá trị gì thì nghĩa là toàn bộ user được quyền truy cập
+export const authorize = (allowedRoles: string[] = []) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const token = req.cookies?.access_token;
@@ -46,34 +46,75 @@ export const authorize = (requireManager: boolean = false) => {
                 throw new Error("Không có token, không được phép truy cập");
             }
 
-            const decoded = jwt.verify(token, JWT_SECRET) as {maNV: string, maDG: string};
+            const decoded = jwt.verify(token, JWT_SECRET) as {maNV: string, maDG: string, role: string};
             
             let user = await NhanVien.findOne({ maNV: decoded.maNV }).select("-password") as IUser;
-            let userType = "nhanvien";
 
             if (!user) {
                 user = await DocGia.findOne({ maDG: decoded.maDG }).select("-password");
-                userType = "docgia";
             }
 
             if (!user) {
                 res.status(401);
                 throw new Error("Token không hợp lệ");
             }
-
-            // Nếu yêu cầu quyền quản lý mà người dùng không phải là quản lý => từ chối
-            if (requireManager && (userType !== "nhanvien" || user.chucVu !== "Quản lý")) {
+            // Kiểm tra quyền hạn (Authorize)
+            if (allowedRoles.length != 0 && !allowedRoles.includes(decoded.role)) {
                 res.status(403);
-                throw new Error("Bạn không có quyền thực hiện thao tác này");
+                throw new Error("Forbidden - Bạn không có quyền thực hiện thao tác này");
             }
 
-            req.user = { ...user.toObject(), userType }; // Thêm userType để nhận diện loại người dùng
+            req.user = { ...user.toObject(), role: decoded.role };
             next();
         } catch (error) {
             next(error);
         }
     };
 };
+
+
+
+
+
+
+
+// export const authorize = (requireManager: boolean = false) => {
+//     return async (req: Request, res: Response, next: NextFunction) => {
+//         try {
+//             const token = req.cookies?.access_token;
+//             if (!token) {
+//                 res.status(401);
+//                 throw new Error("Không có token, không được phép truy cập");
+//             }
+
+//             const decoded = jwt.verify(token, JWT_SECRET) as {maNV: string, maDG: string};
+            
+//             let user = await NhanVien.findOne({ maNV: decoded.maNV }).select("-password") as IUser;
+//             let userType = "nhanvien";
+
+//             if (!user) {
+//                 user = await DocGia.findOne({ maDG: decoded.maDG }).select("-password");
+//                 userType = "docgia";
+//             }
+
+//             if (!user) {
+//                 res.status(401);
+//                 throw new Error("Token không hợp lệ");
+//             }
+
+//             // Nếu yêu cầu quyền quản lý mà người dùng không phải là quản lý => từ chối
+//             if (requireManager && (userType !== "nhanvien" || user.chucVu !== "Quản lý")) {
+//                 res.status(403);
+//                 throw new Error("Bạn không có quyền thực hiện thao tác này");
+//             }
+
+//             req.user = { ...user.toObject(), userType }; // Thêm userType để nhận diện loại người dùng
+//             next();
+//         } catch (error) {
+//             next(error);
+//         }
+//     };
+// };
 
 
 
