@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { INhanVien } from '../config/interface';
+import { INhanVien } from '~/shared/interface';
 
 const NhanVienSchema: Schema = new Schema<INhanVien>({
     maNV: { type: String, required: true, unique: true },

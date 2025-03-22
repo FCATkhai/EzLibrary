@@ -1,7 +1,9 @@
+// @ts-nocheck
 import { Document } from "mongoose";
-import { Request } from "express";
+import { Request } from "./express";
 
 export interface IUser extends Document {
+    maNguoiDung: string;
     role: string;
 }
 //---------------------
@@ -32,6 +34,8 @@ export interface INhaXuatBan extends Document {
 export interface ISach extends Document {
     maSach: string;
     tenSach: string;
+    moTa: string;
+    soTrang: number;
     soQuyen: number;
     namXuatBan: number;
     maNXB: string;
@@ -43,7 +47,7 @@ export interface ISach extends Document {
 export interface ITheoDoiMuonSach extends Document {
     maPM: string;
     maDG: string;
-    maNV: string;
+    maNV?: string;
     maSach: string;
     ngayMuon: Date;
     ngayHenTra?: Date;

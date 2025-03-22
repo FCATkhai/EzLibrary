@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { INhaXuatBan } from '../config/interface';
+import { INhaXuatBan } from '~/shared/interface';
 
 const NhaXuatBanSchema = new Schema<INhaXuatBan>({
     maNXB: { type: String, required: true, unique: true },

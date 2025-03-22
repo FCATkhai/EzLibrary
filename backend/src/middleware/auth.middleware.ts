@@ -4,7 +4,7 @@ import DocGia from "../models/DocGia.model";
 import jwt from "jsonwebtoken";
 
 import dotenv from 'dotenv';
-import { IUser } from "../config/interface";
+import { IUser } from "../../../shared/interface";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET as jwt.Secret;

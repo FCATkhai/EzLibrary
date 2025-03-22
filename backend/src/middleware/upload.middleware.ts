@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import { NextFunction, Response, Request } from "express";
-import { IUploadRequest } from "../config/interface";
+import { IUploadRequest } from "../../../shared/interface";
 import multer from 'multer';
 import fs from "fs";
 import path from "path";
@@ -53,7 +53,7 @@ const uploadBookCover = async (req: Request, res: Response, next: NextFunction) 
         const { tenSach, maNXB } = req.body;
         const SachExists = await Sach.findOne({ tenSach });
         if (SachExists) {
-            res.status(400);
+            res.status(409);
             throw new Error("Sách đã tồn tại");
         }
         const NXBExists = await NhaXuatBan.findOne({maNXB});

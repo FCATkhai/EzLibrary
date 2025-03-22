@@ -1,5 +1,5 @@
 // import { Request } from 'express';
-import { INhanVien, IDocGia } from "./config/interface";
+import { INhanVien, IDocGia } from "../../shared/interface";
 export { };
 declare global {
     namespace Express {

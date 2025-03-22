@@ -1,10 +1,10 @@
 import mongoose, { Schema, Model } from "mongoose";
-import { ITheoDoiMuonSach } from "../config/interface";
+import { ITheoDoiMuonSach } from "../../../shared/interface";
 
 const TheoDoiMuonSachSchema = new Schema<ITheoDoiMuonSach>({
     maPM: { type: String, required: true, unique: true },
     maDG: { type: String, required: true, ref: "DocGia" },
-    maNV: { type: String, required: true, ref: "NhanVien" },
+    maNV: { type: String, ref: "NhanVien" },
     maSach: { type: String, required: true, ref: "Sach" },
     ngayMuon: { type: Date, required: true },
     ngayHenTra: {type: Date},

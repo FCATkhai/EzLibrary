@@ -3,6 +3,7 @@ import Sach from "../models/Sach.model";
 import { nanoid } from "nanoid";
 import { deleteImage } from "../middleware/upload.middleware";
 import { DEFAULT_COVER_URL } from "../config/constants";
+import { FilterQuery } from "mongoose";
 /**
  *  @route GET /api/sach
  *  @desc Lấy danh sách tất cả sách
@@ -10,8 +11,37 @@ import { DEFAULT_COVER_URL } from "../config/constants";
  */
 export const getAllSach = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const sachList = await Sach.find();
-        res.status(200).json(sachList);
+        // eslint-disable-next-line prefer-const
+        let { page = 1, limit = 10, search = "" } = req.query;
+        
+        page = Number(page);
+        limit = Number(limit);
+        const query: FilterQuery<unknown> = {};
+
+        // Thêm điều kiện tìm kiếm
+        if (search) {
+            query.$or = [
+                { tenSach: { $regex: search, $options: "i" } }, // Tìm theo tên sách
+                { tacGia: { $regex: search, $options: "i" } } // Tìm theo tác giả
+            ];
+        }
+
+        const totalSach = await Sach.countDocuments(query);
+        const sachList = await Sach.find(query)
+            .populate({
+                path: "maNXB",
+                model: "NhaXuatBan",
+                foreignField: "maNXB",
+                localField: "maNXB",
+                justOne: true,
+                select: "tenNXB -_id -maNXB"
+            })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const hasMore = page * limit < totalSach;
+
+        res.status(200).json({ totalSach, page, limit, hasMore, data: sachList });
     } catch (error) {
         next(error);
     }
@@ -24,7 +54,14 @@ export const getAllSach = async (req: Request, res: Response, next: NextFunction
  */
 export const getSachById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const sach = await Sach.findOne({ maSach: req.params.id });
+        const sach = await Sach.findOne({ maSach: req.params.id }).populate({
+            path: "maNXB",
+            model: "NhaXuatBan",
+            foreignField: "maNXB",
+            localField: "maNXB",
+            justOne: true,
+            select: "tenNXB -_id -maNXB"
+        });
         if (!sach) {
             res.status(404);
             throw new Error("Không tìm thấy sách");
@@ -42,13 +79,15 @@ export const getSachById = async (req: Request, res: Response, next: NextFunctio
  */
 export const createSach = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { tenSach, soQuyen, namXuatBan, maNXB, tacGia } = req.body;
+        const { tenSach, moTa, soTrang, soQuyen, namXuatBan, maNXB, tacGia } = req.body;
         
         const maSach = "S-" + nanoid(6);
         const coverUrl = req.file?.path || DEFAULT_COVER_URL;
         const newSach = new Sach({
             maSach,
             tenSach,
+            moTa,
+            soTrang,
             soQuyen,
             namXuatBan,
             maNXB,

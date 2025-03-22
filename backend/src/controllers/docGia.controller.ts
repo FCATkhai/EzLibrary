@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import DocGia from "../models/DocGia.model";
 import { nanoid } from "nanoid";
@@ -48,7 +48,6 @@ export const registerDocGia = async (req: Request, res: Response, next: NextFunc
 export const loginDocGia = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { soDienThoai, password } = req.body;
-
         const docGia = await DocGia.findOne({ soDienThoai });
         if (!docGia) {
             res.status(401);
@@ -74,7 +73,15 @@ export const loginDocGia = async (req: Request, res: Response, next: NextFunctio
             sameSite: "strict",
         });
 
-        res.json({ message: "Đăng nhập thành công", docGia });
+        res.json({ 
+            message: "Đăng nhập thành công", 
+            docGia: {
+                maDG: docGia.maDG,
+                hoLot: docGia.hoLot,
+                ten: docGia.ten,
+                soDienThoai: docGia.soDienThoai,
+                role: USER_ROLES.DOCGIA
+            } });
     } catch (error) {
         next(error);
     }

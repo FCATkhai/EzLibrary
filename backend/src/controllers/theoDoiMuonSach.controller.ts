@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import TheoDoiMuonSach from "../models/TheoDoiMuonSach.model";
 import { nanoid } from "nanoid";
-import { IDocGia, INhanVien } from "../config/interface";
+import { IDocGia, INhanVien } from "../../../shared/interface";
 import DocGia from "../models/DocGia.model";
+import Sach from "../models/Sach.model";
 
 /**
  *  @route GET /api/muon-sach
@@ -11,7 +12,33 @@ import DocGia from "../models/DocGia.model";
  */
 export const getAllPhieuMuon = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const phieuMuons = await TheoDoiMuonSach.find().populate("maDG maNV maSach");
+        // const phieuMuons = await TheoDoiMuonSach.find().populate("maDG maNV maSach");
+        const phieuMuons = await TheoDoiMuonSach.find().populate([
+        {
+            path: "maDG",
+            model: "DocGia",
+            foreignField: "maDG",
+            localField: "maDG",
+            justOne: true,
+            select: "hoLot ten -_id"
+        },
+        {
+            path: "maNV",
+            model: "NhanVien",
+            foreignField: "maNV",
+            localField: "maNV",
+            justOne: true,
+            select: "hoTenNV -_id"
+        },
+        {
+            path: "maSach",
+            model: "Sach",
+            foreignField: "maSach",
+            localField: "maSach",
+            justOne: true,
+            select: "tenSach -_id"
+        }
+        ]);
         res.status(200).json(phieuMuons);
     } catch (error) {
         next(error);
@@ -19,7 +46,7 @@ export const getAllPhieuMuon = async (req: Request, res: Response, next: NextFun
 };
 
 /**
- *  @route POST /api/muon-sach
+ *  @route POST /api/muon-sach/doc-gia
  *  @desc Độc giả tạo phiếu mượn sách
  *  @access DocGia
  */
@@ -49,7 +76,7 @@ export const createPhieuMuon_DG = async (req: Request, res: Response, next: Next
 };
 
 /**
- *  @route POST /api/muon-sach
+ *  @route POST /api/muon-sach/nhan-vien
  *  @desc Nhân viên tạo phiếu mượn sách
  *  @access NV_QL
  *  @param req.body = { maSach, soDienThoai_DG }
@@ -111,12 +138,24 @@ export const duyetPhieuMuon = async (req: Request, res: Response, next: NextFunc
             res.status(404);
             throw new Error("Không tìm thấy phiếu mượn");
         }
-
         if (phieuMuon.trangThai !== "pending") {
             res.status(400);
             throw new Error("Phiếu mượn đã được xử lý");
         }
 
+        // Thao tác xử lý
+        const sach = await Sach.findOne({maSach: phieuMuon.maSach});
+        if (!sach) {
+            res.status(404);
+            throw new Error("Sách cần mượn không tồn tại");
+        }
+        if (sach.soQuyen == 0) {
+            res.status(400);
+            throw new Error("Sách đã hết, không thể cho mượn");
+        }
+        sach.soQuyen -= 1;
+        await sach.save();
+        
         phieuMuon.trangThai = status;
         phieuMuon.maNV = user.maNV; 
         phieuMuon.ngayHenTra = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Hẹn trả sau 7 ngày
@@ -145,6 +184,14 @@ export const traSach = async (req: Request, res: Response, next: NextFunction) =
             res.status(400);
             throw new Error("Sách chưa được mượn hoặc đã trả");
         }
+
+        const sach = await Sach.findOne({maSach: phieuMuon.maSach});
+        if (!sach) {
+            res.status(404);
+            throw new Error("Sách đã mượn không tồn tại");
+        }
+        sach.soQuyen += 1;
+        await sach.save();
 
         phieuMuon.trangThai = "returned";
         phieuMuon.ngayTra = new Date(); // Cập nhật ngày trả

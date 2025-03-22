@@ -2,11 +2,6 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const dbConfig = {
-    database: "test",
-    imgBucket: "images"
-}
-
 const connectDB = async (): Promise<void> => {
     try {
         mongoose.set("strictQuery", false);

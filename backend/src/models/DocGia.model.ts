@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { IDocGia } from '../config/interface';
+import { IDocGia } from '~/shared/interface';
 
 const DocGiaSchema: Schema = new Schema<IDocGia>({
     maDG: { type: String, required: true, unique: true },

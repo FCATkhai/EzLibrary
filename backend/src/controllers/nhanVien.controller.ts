@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import NhanVien from "../models/NhanVien.model";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import jwt  from "jsonwebtoken";
 
