@@ -3,7 +3,7 @@ import { ISach } from '../../../shared/interface';
 
 const SachSchema = new Schema<ISach>({
     maSach: { type: String, required: true, unique: true },
-    tenSach: { type: String, required: true },
+    tenSach: { type: String, required: true, unique: true },
     moTa: { type: String, required: true },
     soTrang: { type: Number, required: true, default: 1 },
     soQuyen: { type: Number, required: true, default: 1 },

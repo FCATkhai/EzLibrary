@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ref, onMounted, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
-import { useNXB } from "@/composables/useNXB";
+import { useNXBAdmin } from "@/composables/admin/useNXBAdmin";
 import { useToast } from "vue-toastification";
 import type { AxiosError } from "axios";
-import type { INhaXuatBan } from "~/shared/interface";
+
 const {
     nhaXuatBan,
     nhaXuatBans,
@@ -15,10 +15,10 @@ const {
     searchTerm,
     fetchNXBs,
     fetchNXBbyId,
-    createNXB,
-    updateNXB,
-    deleteNXB
-} = useNXB();
+    addNXB,
+    editNXB,
+    removeNXB
+} = useNXBAdmin();
 
 const router = useRouter();
 const toast = useToast();
@@ -37,7 +37,7 @@ const resetModalField = () => {
 
 const showModal = async (status: ModalStatus, id: string = "") => {
     modalStatus.value = status;
-    if (status == "editing") {
+    if (status == "editing" && id) {
         await fetchNXBbyId(id);
         if (nhaXuatBan.value) {
             tenNXB.value = nhaXuatBan.value.tenNXB || "";
@@ -69,7 +69,7 @@ const handleSubmit = async () => {
 
 const handleAdd = async () => {
     try {
-        await createNXB({ tenNXB: tenNXB.value, diaChi: diaChi.value });
+        await addNXB({ tenNXB: tenNXB.value, diaChi: diaChi.value });
         toast.success("Thêm NXB thành công");
 
     } catch (err) {
@@ -86,7 +86,7 @@ const handleEdit = async () => {
             tenNXB: tenNXB.value,
             diaChi: diaChi.value
         }
-        await updateNXB(nhaXuatBan.value?.maNXB as string, updatedNXB);
+        await editNXB(nhaXuatBan.value?.maNXB as string, updatedNXB);
         toast.success("Chỉnh sửa NXB thành công");
     } catch (err) {
         // @ts-ignore
@@ -99,7 +99,7 @@ const handleEdit = async () => {
 
 const handleDelete = async (id: string) => {
     if (confirm("Bạn có chắc chắn muốn xóa nhà xuất bản này? Khi xoá NXB sẽ xoá luôn các sách thuộc NXB đó")) {
-        await deleteNXB(id);
+        await removeNXB(id);
         toast.success("Xoá NXB thành công");
     }
 };

@@ -5,8 +5,6 @@ import { IUploadRequest } from "../../../shared/interface";
 import multer from 'multer';
 import fs from "fs";
 import path from "path";
-import Sach from "../models/Sach.model";
-import NhaXuatBan from "../models/NhaXuatBan.model";
 
 dotenv.config();
 
@@ -50,17 +48,6 @@ const uploadBookCover = async (req: Request, res: Response, next: NextFunction) 
     const uploadReq = req as IUploadRequest;
     
     try {
-        const { tenSach, maNXB } = req.body;
-        const SachExists = await Sach.findOne({ tenSach });
-        if (SachExists) {
-            res.status(409);
-            throw new Error("Sách đã tồn tại");
-        }
-        const NXBExists = await NhaXuatBan.findOne({maNXB});
-        if (!NXBExists) {
-            res.status(404);
-            throw new Error("Nhà xuất bản không tồn tại");
-        }
 
         if (uploadReq.file) {
             const filePath = uploadReq.file.path;

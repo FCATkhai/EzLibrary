@@ -8,7 +8,7 @@ import {
 } from "@/api/nhaXuatBan.api";
 import type { INhaXuatBan } from "~/shared/interface";
 
-export function useNXB() {
+export function useNXBAdmin() {
     const nhaXuatBan = ref<INhaXuatBan | null>(null);
     const nhaXuatBans = ref<INhaXuatBan[]>([]);
     const page = ref(1);
@@ -22,7 +22,7 @@ export function useNXB() {
 
     const fetchNXBs = async (reset = false) => {
 
-        if (loading.value) return;
+        if (!hasMore.value || loading.value) return;
         if (reset) {
             nhaXuatBans.value = [];
             page.value = 1;
@@ -36,7 +36,7 @@ export function useNXB() {
                 limit: limit.value,
                 search: searchTerm.value
             });
-            // console.log("response: ", res);
+            console.log("response: ", res);
             nhaXuatBans.value = res.data;
             totalPages.value = res.totalPages;
             hasMore.value = res.hasMore;
@@ -60,13 +60,14 @@ export function useNXB() {
             nhaXuatBan.value = res.data;
         } catch (error) {
             console.error("Lỗi khi tải nhà xuất bản", error);
+            throw error;
         } finally {
             loading.value = false;
         }
     }
 
     // Tạo NXB
-    const createNXB = async (data: { tenNXB: string; diaChi: string }) => {
+    const addNXB = async (data: { tenNXB: string; diaChi: string }) => {
         loading.value = true;
         try {
             const newNXB = await createNhaXuatBan(data);
@@ -81,7 +82,7 @@ export function useNXB() {
     };
 
 
-    const updateNXB = async (maNXB: string, data: Partial<INhaXuatBan>) => {
+    const editNXB = async (maNXB: string, data: Partial<INhaXuatBan>) => {
         loading.value = true;
         try {
             const updatedNXB = await updateNhaXuatBan(maNXB, data);
@@ -95,7 +96,7 @@ export function useNXB() {
         }
     };
 
-    const deleteNXB = async (maNXB: string) => {
+    const removeNXB = async (maNXB: string) => {
         loading.value = true;
         try {
             await deleteNhaXuatBan(maNXB);
@@ -128,8 +129,8 @@ export function useNXB() {
         searchTerm,
         fetchNXBs,
         fetchNXBbyId,
-        createNXB,
-        updateNXB,
-        deleteNXB
+        addNXB,
+        editNXB,
+        removeNXB
     };
 };

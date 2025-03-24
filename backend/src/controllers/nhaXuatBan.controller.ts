@@ -78,7 +78,6 @@ export const createNhaXuatBan = async (req: Request, res: Response, next: NextFu
         }
         
         const maNXB = "NXB-" + generateId();
-        console.log(maNXB);
 
         const nhaXuatBan = await NhaXuatBan.create({ maNXB, tenNXB, diaChi });
         res.status(201).json(nhaXuatBan);

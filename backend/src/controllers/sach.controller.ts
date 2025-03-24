@@ -35,7 +35,7 @@ export const getAllSach = async (req: Request, res: Response, next: NextFunction
                 foreignField: "maNXB",
                 localField: "maNXB",
                 justOne: true,
-                select: "tenNXB -_id -maNXB"
+                select: "tenNXB -_id"
             })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -94,12 +94,12 @@ export const createSach = async (req: Request, res: Response, next: NextFunction
         const newSach = new Sach({
             maSach,
             tenSach,
+            tacGia,
             moTa,
+            namXuatBan,
             soTrang,
             soQuyen,
-            namXuatBan,
             maNXB,
-            tacGia,
             coverUrl
         });
 
@@ -134,6 +134,13 @@ export const updateSach = async (req: Request, res: Response, next: NextFunction
 
         res.status(200).json({ message: "Cập nhật sách thành công", sach: updatedSach });
     } catch (error) {
+                // Check for duplicate key error (E11000)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error 
+        if (error.code === 11000 || error.name === "MongoServerError" && error.code === 11000) {
+            res.status(409); // Conflict status code
+            return next(new Error(`Tên sách "${req.body.tenSach}" đã tồn tại`));
+        }
         next(error);
     }
 };
