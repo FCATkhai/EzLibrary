@@ -29,7 +29,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { getSachById } from "@/api/sach.api";
-import { muonSachDG } from "@/api/phieuMuon.api";
+import { createPhieuMuon_DG } from "@/api/phieuMuon.api";
 import type { ISach } from "~/shared/interface";
 
 const sach = ref<ISach | null>(null);
@@ -52,7 +52,7 @@ const muonSach = async () => {
     message.value = "";
 
     try {
-        await muonSachDG(sach.value!.maSach);
+        await createPhieuMuon_DG(sach.value!.maSach);
         message.value = "Mượn sách thành công! Vui lòng chờ xác nhận.";
     } catch (err) {
         error.value = "Không thể mượn sách. Vui lòng thử lại.";

@@ -12,5 +12,7 @@ export const USER_GROUPS = {
     QUANLY: [USER_ROLES.QUANLY],
 };
 
+export const ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
 export const DEFAULT_COVER_URL = 
 "https://res.cloudinary.com/dpzwsiz0s/image/upload/v1742028355/EzLibrary/book-cover/default-book-cover.jpg";

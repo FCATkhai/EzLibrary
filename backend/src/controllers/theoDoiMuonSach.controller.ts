@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import TheoDoiMuonSach from "../models/TheoDoiMuonSach.model";
-import { nanoid } from "nanoid";
 import { IDocGia, INhanVien } from "../../../shared/interface";
 import DocGia from "../models/DocGia.model";
 import Sach from "../models/Sach.model";
+import generateId from "../utils/generateId.util";
 
 /**
  *  @route GET /api/muon-sach
@@ -59,7 +59,7 @@ export const createPhieuMuon_DG = async (req: Request, res: Response, next: Next
         }
         const user = req.user as IDocGia;
         const maDG = user.maDG;
-        const maPM = "PM-" + nanoid(6);
+        const maPM = "PM-" + generateId();
         const newPhieuMuon = new TheoDoiMuonSach({
             maPM,
             maDG,
@@ -88,6 +88,19 @@ export const createPhieuMuon_NV = async (req: Request, res: Response, next: Next
             res.status(403);
             throw new Error("Cần đăng nhập để thực hiện chức năng này");
         }
+
+        const sach = await Sach.findOne({maSach});
+        if (!sach) {
+            res.status(404);
+            throw new Error("Sách cần mượn không tồn tại");
+        }
+        if (sach.soQuyen == 0) {
+            res.status(400);
+            throw new Error("Sách đã hết, không thể cho mượn");
+        }
+        sach.soQuyen -= 1;
+        await sach.save();
+
         const docGia = await DocGia.findOne({soDienThoai: soDienThoai_DG});
         if (!docGia) {
             res.status(404);
@@ -95,7 +108,7 @@ export const createPhieuMuon_NV = async (req: Request, res: Response, next: Next
         }
         const user = req.user as INhanVien;
         const maNV =user.maNV;
-        const maPM = "PM-" + nanoid(6);
+        const maPM = "PM-" + generateId();
         const newPhieuMuon = new TheoDoiMuonSach({
             maPM,
             maDG: docGia.maDG,

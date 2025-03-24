@@ -1,6 +1,7 @@
 import { ref, watch } from "vue";
 import { getAllSach } from "@/api/sach.api";
 import type { ISach } from "~/shared/interface"
+
 export function useSach() {
     const books = ref<ISach[]>([]);
     const page = ref(1);
@@ -9,9 +10,10 @@ export function useSach() {
     const loading = ref(false);
     const searchTerm = ref("");
 
-    const fetchBooks = async (reset = false) => {
-        if (!hasMore.value || loading.value) return;
+    let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
+    const fetchBooks = async (reset = false) => {
+        if (!reset && (!hasMore.value || loading.value)) return;
         if (reset) {
             books.value = [];
             page.value = 1;
@@ -20,7 +22,7 @@ export function useSach() {
 
         loading.value = true;
         try {
-            const data = await getAllSach({ page: page.value, limit, search: searchTerm.value });
+            const data = await getAllSach({ page: page.value, limit: limit, search: searchTerm.value });
             if (reset) {
                 books.value = data.data;
             } else {
@@ -36,7 +38,11 @@ export function useSach() {
 
     // Theo dõi searchTerm, nếu thay đổi thì reset dữ liệu và tìm kiếm lại
     watch(searchTerm, () => {
-        fetchBooks(true);
+        if (searchTimeout) clearTimeout(searchTimeout);
+
+        searchTimeout = setTimeout(() => {
+            fetchBooks(true);
+        }, 500); // Đợi 500ms sau khi người dùng ngừng nhập
     });
 
     return { books, fetchBooks, hasMore, loading, searchTerm };

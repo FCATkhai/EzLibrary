@@ -5,14 +5,6 @@
         <!-- Ô tìm kiếm -->
         <input v-model="searchTerm" type="text" placeholder="Tìm kiếm sách hoặc tác giả..."
             class="input input-bordered w-full mb-4" />
-
-        <!-- <div v-for="sach in books" :key="sach.maSach" class="card bg-base-100 shadow-lg p-4 mb-4">
-            <h2 class="text-lg font-semibold">{{ sach.tenSach }}</h2>
-            <p class="text-gray-600">Tác giả: {{ sach.tacGia }}</p>
-            <p class="text-gray-600">NXB: {{
-            // @ts-ignore
-            sach.maNXB?.tenNXB || "Không xác định" }}</p>
-        </div> -->
         <SachList :sach-list="books" />
 
         <div v-if="loading" class="text-center text-blue-500">Đang tải...</div>
@@ -22,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, watch, watchEffect } from "vue";
 import { useSach } from "@/composables/useSach";
 import SachList from "@/components/SachList.vue";
 
@@ -36,7 +28,6 @@ const handleScroll = () => {
 
 onMounted(() => {
     fetchBooks();
-    console.log(books.value)
     window.addEventListener("scroll", handleScroll);
 });
 

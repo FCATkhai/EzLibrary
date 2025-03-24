@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import NhanVien from "../models/NhanVien.model";
 import bcrypt from "bcryptjs";
-import { nanoid } from "nanoid";
+import generateId from "../utils/generateId.util";
 import jwt  from "jsonwebtoken";
 
 import dotenv from 'dotenv';
@@ -22,7 +22,7 @@ export const createNhanVien = async (req: Request, res: Response, next: NextFunc
             res.status(400);
             throw new Error("Số điện thoại đã tồn tại");
         }
-        const maNV = "NV-"+nanoid(6);
+        const maNV = "NV-" + generateId();
         // Mã hóa mật khẩu
         const hashedPassword = await bcrypt.hash(password, 10);
 

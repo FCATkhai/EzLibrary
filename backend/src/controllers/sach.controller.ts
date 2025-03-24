@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import Sach from "../models/Sach.model";
-import { nanoid } from "nanoid";
 import { deleteImage } from "../middleware/upload.middleware";
 import { DEFAULT_COVER_URL } from "../config/constants";
 import { FilterQuery } from "mongoose";
+import generateId from "../utils/generateId.util";
+
 /**
  *  @route GET /api/sach
  *  @desc Lấy danh sách tất cả sách
@@ -26,7 +27,7 @@ export const getAllSach = async (req: Request, res: Response, next: NextFunction
             ];
         }
 
-        const totalSach = await Sach.countDocuments(query);
+        const total = await Sach.countDocuments(query);
         const sachList = await Sach.find(query)
             .populate({
                 path: "maNXB",
@@ -39,9 +40,16 @@ export const getAllSach = async (req: Request, res: Response, next: NextFunction
             .skip((page - 1) * limit)
             .limit(limit);
 
-        const hasMore = page * limit < totalSach;
+        const hasMore = page * limit < total;
 
-        res.status(200).json({ totalSach, page, limit, hasMore, data: sachList });
+        res.status(200).json({ 
+            total, 
+            page, 
+            limit, 
+            totalPages: Math.ceil(total / limit), 
+            hasMore, 
+            data: sachList 
+        });
     } catch (error) {
         next(error);
     }
@@ -81,7 +89,7 @@ export const createSach = async (req: Request, res: Response, next: NextFunction
     try {
         const { tenSach, moTa, soTrang, soQuyen, namXuatBan, maNXB, tacGia } = req.body;
         
-        const maSach = "S-" + nanoid(6);
+        const maSach = "S-" + generateId();
         const coverUrl = req.file?.path || DEFAULT_COVER_URL;
         const newSach = new Sach({
             maSach,

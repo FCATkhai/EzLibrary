@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import DocGia from "../models/DocGia.model";
-import { nanoid } from "nanoid";
-import { USER_ROLES } from "../config/constants";
+import { USER_ROLES} from "../config/constants";
+import generateId from "../utils/generateId.util";
 /**
  *  Đăng ký độc giả mới
  *  @route POST /api/doc-gia/register
@@ -19,7 +19,7 @@ export const registerDocGia = async (req: Request, res: Response, next: NextFunc
             throw new Error("Số điện thoại đã tồn tại");
         }
 
-        const maDG = "DG-" + nanoid(6);
+        const maDG = "DG-" + generateId();
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newDocGia = new DocGia({

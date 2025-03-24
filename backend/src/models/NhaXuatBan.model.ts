@@ -3,7 +3,7 @@ import { INhaXuatBan } from '~/shared/interface';
 
 const NhaXuatBanSchema = new Schema<INhaXuatBan>({
     maNXB: { type: String, required: true, unique: true },
-    tenNXB: { type: String, required: true },
+    tenNXB: { type: String, required: true, unique: true },
     diaChi: { type: String, required: true },
 });
 

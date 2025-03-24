@@ -15,7 +15,11 @@ const errorMsg = ref("");
 const handleLogin = async () => {
     try {
         await authStore.login(soDienThoai.value, password.value, role.value);
-        router.push("/"); // Chuyển hướng về trang chủ
+        if (role.value == USER_ROLES.DOCGIA) {
+            router.push("/"); // Chuyển hướng về trang chủ
+        } else {
+            router.push({name: "Dashboard"})
+        }
     } catch (error) {
         errorMsg.value = (error as Error).message;
     }

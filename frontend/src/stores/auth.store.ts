@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
 import { loginDG, logoutDG, loginNV, logoutNV } from "@/api/auth.api";
 import type { IDocGia, INhanVien, IUser } from "~/shared/interface";
 import { USER_ROLES, type UserRole } from "~/shared/userRoles";
@@ -21,6 +20,7 @@ export const useAuthStore = defineStore("auth", {
                 if (role == USER_ROLES.DOCGIA) {
 
                     const data: IDocGia = await loginDG(soDienThoai, password);
+                    console.log(data);
                     this.user = {
                         maNguoiDung: data.maDG,
                         hoTen: data.hoLot + " " + data.ten,
@@ -29,11 +29,12 @@ export const useAuthStore = defineStore("auth", {
                     this.isAuthenticated = true;
                 }
                 if (role == USER_ROLES.NHANVIEN) {
-                    const data: INhanVien = await loginNV(soDienThoai, password);
+                    const data = await loginNV(soDienThoai, password);
+                    const nhanVien: INhanVien = data.nhanVien;
                     this.user = {
-                        maNguoiDung: data.maNV,
-                        hoTen: data.hoTenNV,
-                        role: data.chucVu as UserRole
+                        maNguoiDung: nhanVien.maNV,
+                        hoTen: nhanVien.hoTenNV,
+                        role: nhanVien.chucVu as UserRole
                     };
                     this.isAuthenticated = true;
                 }
