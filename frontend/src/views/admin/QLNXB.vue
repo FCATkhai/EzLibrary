@@ -1,12 +1,9 @@
 <script lang="ts" setup>
 import { ref, onMounted, useTemplateRef } from "vue";
-import { useRouter } from "vue-router";
 import { useNXBAdmin } from "@/composables/admin/useNXBAdmin";
 import { useToast } from "vue-toastification";
-import type { AxiosError } from "axios";
 
 const {
-    nhaXuatBan,
     nhaXuatBans,
     totalPages,
     page,
@@ -20,87 +17,89 @@ const {
     removeNXB
 } = useNXBAdmin();
 
-const router = useRouter();
 const toast = useToast();
 
 //--------------- modal ----------------
 type ModalStatus = "adding" | "editing";
-const modalStatus = ref<"adding" | "editing" | "">("");
+const modalStatus = ref<ModalStatus>("adding");
 const closeModalBtn = useTemplateRef('closeModalBtn');
+const closeDeleteModalBtn = useTemplateRef("closeDeleteModalBtn");
+
 const tenNXB = ref("");
 const diaChi = ref("");
 
-const resetModalField = () => {
-    tenNXB.value = "";
-    diaChi.value = "";
-}
+const editingId = ref<string | null>(null);
+const errorMessage = ref<string | null>(null);
+
+
 
 const showModal = async (status: ModalStatus, id: string = "") => {
     modalStatus.value = status;
     if (status == "editing" && id) {
-        await fetchNXBbyId(id);
-        if (nhaXuatBan.value) {
-            tenNXB.value = nhaXuatBan.value.tenNXB || "";
-            diaChi.value = nhaXuatBan.value.diaChi || "";
+        const nhaXuatBan = nhaXuatBans.value.find((nxb) => nxb.maNXB === id);
+        if (nhaXuatBan) {
+            tenNXB.value = nhaXuatBan.tenNXB;
+            diaChi.value = nhaXuatBan.diaChi || "";
+            editingId.value = id;
         }
     }
     const modal = document.getElementById('form_modal') as HTMLDialogElement;
     if (modal) {
-        modal.showModal(); // Open the modal
+        modal.showModal();
     }
 }
 
-const closeModal = () => {
-    resetModalField();
-    closeModalBtn.value?.click();
-}
+const showDeleteModal = (maNXB: string) => {
+    editingId.value = maNXB;
+    const modal = document.getElementById("delete_modal") as HTMLDialogElement;
+    if (modal) modal.showModal();
+};
+
+
 
 
 const handleSubmit = async () => {
-    if (modalStatus.value == "adding") {
-        await handleAdd();
-    } else {
-        await handleEdit();
-    }
-    closeModalBtn.value?.click();
-
-
-}
-
-const handleAdd = async () => {
+    const data: {
+        tenNXB: string,
+        diaChi?: string
+    } = {
+        tenNXB: tenNXB.value,
+    };
+    if (diaChi.value) data.diaChi = diaChi.value;
     try {
-        await addNXB({ tenNXB: tenNXB.value, diaChi: diaChi.value });
+        if (modalStatus.value == "adding") {
+        await addNXB(data);
         toast.success("Thêm NXB thành công");
-
-    } catch (err) {
-        // @ts-ignore
-        toast.error((err as AxiosError).response?.data?.message || "Lỗi khi thêm NXB");
-    } finally {
-        resetModalField();
-    }
-}
-
-const handleEdit = async () => {
-    try {
-        const updatedNXB = {
-            tenNXB: tenNXB.value,
-            diaChi: diaChi.value
-        }
-        await editNXB(nhaXuatBan.value?.maNXB as string, updatedNXB);
+    } else if (modalStatus.value == "editing" && editingId.value) {
+        await editNXB(editingId.value, data);
         toast.success("Chỉnh sửa NXB thành công");
-    } catch (err) {
-        // @ts-ignore
-        toast.error((err as AxiosError).response?.data?.message || "Lỗi khi chỉnh sửa NXB");
-    } finally {
-        resetModalField();
+    }
+
+    resetForm();
+    closeModalBtn.value?.click();
+    } catch (error: any) {
+        errorMessage.value = error.response?.data?.message || "Lỗi khi xử lý NXB";
     }
 }
 
+const resetForm = () => {
+    tenNXB.value = "";
+    diaChi.value = "";
 
-const handleDelete = async (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa nhà xuất bản này? Khi xoá NXB sẽ xoá luôn các sách thuộc NXB đó")) {
-        await removeNXB(id);
-        toast.success("Xoá NXB thành công");
+    editingId.value = null;
+    errorMessage.value = null;
+}
+
+
+const handleDelete = async () => {
+    if (!editingId.value) return;
+    try {
+        await removeNXB(editingId.value);
+        toast.success("Xóa NXB thành công");
+        editingId.value = null;
+        closeDeleteModalBtn.value?.click();
+    } catch (error: any) {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa NXB");
     }
 };
 
@@ -130,7 +129,7 @@ onMounted(() => {
 <template>
     <div class="p-4">
         <h1 class="text-xl font-bold mb-4">Quản lý Nhà Xuất Bản</h1>
-        <button class="my-4 btn btn-success block" @click="showModal('adding')">Thêm NXB</button>
+        <button class="my-4 btn btn-success block" @click="showModal('adding')" :disabled="loading">Thêm NXB</button>
         <input v-model="searchTerm" placeholder="Tìm kiếm NXB..." class="input input-bordered mb-4" />
         <template v-if="loading">
             <p>Đang tải</p>
@@ -152,7 +151,7 @@ onMounted(() => {
                     <td>
                         <button @click="showModal('editing', nxb.maNXB)"
                             class="btn btn-warning btn-sm mr-2">Sửa</button>
-                        <button @click="handleDelete(nxb.maNXB)" class="btn btn-error btn-sm">Xóa</button>
+                        <button @click="showDeleteModal(nxb.maNXB)" class="btn btn-error btn-sm">Xóa</button>
                     </td>
                 </tr>
             </tbody>
@@ -166,7 +165,7 @@ onMounted(() => {
     </div>
 
 
-    <!-- Form data -->
+    <!-- Form Modal -->
     <dialog id="form_modal" class="modal">
         <div class="modal-box w-11/12 max-w-5xl">
             <fieldset class="mx-auto fieldset w-lg bg-base-200 border border-base-300 p-4 rounded-box ">
@@ -174,18 +173,44 @@ onMounted(() => {
                     {{ modalStatus === "adding" ? "Thêm Nhà xuất bản" : "Chỉnh sửa Nhà xuất bản" }}
                 </legend>
                 <form @submit.prevent="handleSubmit">
-                    <label class="fieldset-label text-lg">Tên NXB</label>
+                    <label class="fieldset-label text-lg">Tên NXB<span class="text-error">*</span></label>
                     <input class="input w-full" v-model="tenNXB" type="text" required>
                     <label class="fieldset-label text-lg">Địa chỉ</label>
-                    <input class="input w-full" type="text" v-model="diaChi" required></input>
+                    <input class="input w-full" type="text" v-model="diaChi"></input>
 
+                    <p class="text-error text-xl">{{ errorMessage }}</p>
                     <div class="modal-action">
-                        <button class="btn btn-primary">Submit</button>
+                        <div v-if="loading">
+                            <span class="loading loading-spinner loading-xl"></span>
+                            <p>Loading</p>
+                        </div>
+                        <button class="btn btn-primary" type="submit" :disabled="loading">Submit</button>
                         <form method="dialog">
-                            <button ref="closeModalBtn" class="btn" @click="closeModal">Huỷ</button>
+                            <button ref="closeModalBtn" @click="resetForm" class="btn" :disabled="loading">Huỷ</button>
                         </form>
                     </div>
                 </form>
+            </fieldset>
+        </div>
+    </dialog>
+
+    <!-- Delete Confirmation Modal -->
+    <dialog id="delete_modal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <fieldset class="mx-auto fieldset w-lg bg-base-200 border border-base-300 p-4 rounded-box">
+                <legend class="fieldset-legend text-xl font-bold">Xác Nhận Xóa</legend>
+                <p class="text-lg mb-4">Bạn có chắc chắn muốn xóa NXB này không?</p>
+                <p class="text-lg text-error">khi xoá NXB, các sách thuộc NXB cũng sẽ bị xoá</p>
+                <div class="modal-action">
+                    <div v-if="loading">
+                        <span class="loading loading-spinner loading-xl"></span>
+                        <p>Loading</p>
+                    </div>
+                    <button class="btn btn-error" @click="handleDelete" :disabled="loading">Xóa</button>
+                    <form method="dialog">
+                        <button ref="closeDeleteModalBtn" class="btn" @click="editingId = null" :disabled="loading">Hủy</button>
+                    </form>
+                </div>
             </fieldset>
         </div>
     </dialog>

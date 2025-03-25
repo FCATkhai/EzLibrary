@@ -7,6 +7,8 @@ import {
     getDocGiaById,
     updateDocGia,
     deleteDocGia,
+    changePasswordDocGia,
+    resetPasswordDocGia
 } from "../controllers/docGia.controller";
 import { authorize } from "../middleware/auth.middleware";
 import { USER_GROUPS } from "../config/constants";
@@ -17,9 +19,11 @@ router.post("/register", registerDocGia);
 router.post("/login", loginDocGia);
 router.post("/logout", logoutDocGia);
 
-router.get("/", authorize(USER_GROUPS.QUANLY), getAllDocGia);
 router.get("/:id", authorize(), getDocGiaById);
-router.put("/:id", authorize(), updateDocGia);
+router.get("/", authorize(USER_GROUPS.QUANLY), getAllDocGia);
+router.put("/:id", authorize(USER_GROUPS.DG_QL), updateDocGia);
+router.patch("/:id/change-password", authorize(), changePasswordDocGia);
+router.patch("/:id/reset-password", authorize(USER_GROUPS.QUANLY), resetPasswordDocGia);
 router.delete("/:id", authorize(USER_GROUPS.QUANLY), deleteDocGia);
 
 export default router;

@@ -26,6 +26,7 @@ export function useSachAdmin() {
 
         if (reset) {
             page.value = 1;
+            hasMore.value = true;
         }
 
         loading.value = true;
@@ -35,6 +36,7 @@ export function useSachAdmin() {
                 limit: limit.value,
                 search: searchTerm.value,
             });
+            // console.log("response: ", response);
             books.value = response.data; // Replace for pagination
             totalPages.value = response.totalPages;
             hasMore.value = page.value < totalPages.value;
@@ -67,13 +69,13 @@ export function useSachAdmin() {
         loading.value = true;
         try {
             const newSach = await createSach(formData);
-            await fetchBooks(true);
             return newSach;
         } catch (error) {
             console.error("Lỗi khi tạo sách:", error);
             throw error;
         } finally {
             loading.value = false;
+            await fetchBooks(true);
         }
     };
 
@@ -81,13 +83,13 @@ export function useSachAdmin() {
         loading.value = true;
         try {
             const updatedSach = await updateSach(maSach, formData);
-            await fetchBooks();
             return updatedSach;
         } catch (error) {
             console.error("Lỗi khi cập nhật sách:", error);
             throw error;
         } finally {
             loading.value = false;
+            await fetchBooks();
         }
     };
 
@@ -95,12 +97,12 @@ export function useSachAdmin() {
         loading.value = true;
         try {
             await deleteSach(maSach);
-            await fetchBooks();
         } catch (error) {
             console.error("Lỗi khi xóa sách:", error);
             throw error;
         } finally {
             loading.value = false;
+            await fetchBooks();
         }
     };
 
@@ -110,6 +112,10 @@ export function useSachAdmin() {
             fetchBooks(true);
         }, 500);
     });
+
+    // watch(page, () => {
+    //     console.log(page.value)
+    // })
 
     return {
         books,

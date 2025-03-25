@@ -5,6 +5,7 @@ import { Request } from "./express";
 export interface IUser extends Document {
     maNguoiDung: string;
     role: string;
+    comparePassword(candidatePassword: string): Promise<boolean>;
 }
 //---------------------
 export interface INhanVien extends IUser {

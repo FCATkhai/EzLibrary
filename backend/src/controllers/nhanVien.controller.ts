@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import NhanVien from "../models/NhanVien.model";
-import bcrypt from "bcryptjs";
 import generateId from "../utils/generateId.util";
 import jwt  from "jsonwebtoken";
 
 import dotenv from 'dotenv';
+import { FilterQuery } from "mongoose";
+import { USER_ROLES } from "../config/constants";
 dotenv.config();
 
 
@@ -23,13 +24,11 @@ export const createNhanVien = async (req: Request, res: Response, next: NextFunc
             throw new Error("Số điện thoại đã tồn tại");
         }
         const maNV = "NV-" + generateId();
-        // Mã hóa mật khẩu
-        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newNhanVien = new NhanVien({
             maNV,
             hoTenNV,
-            password: hashedPassword,
+            password,
             chucVu,
             diaChi,
             soDienThoai,
@@ -57,7 +56,7 @@ export const loginNhanVien = async (req: Request, res: Response, next: NextFunct
             throw new Error("Số điện thoại hoặc mật khẩu không đúng");
         }
 
-        const isMatch = await bcrypt.compare(password, nhanVien.password);
+        const isMatch = await nhanVien.comparePassword(password);
         if (!isMatch) {
             res.status(401);
             throw new Error("Số điện thoại hoặc mật khẩu không đúng");
@@ -113,8 +112,34 @@ export const logoutNhanVien = (req: Request, res: Response, next: NextFunction) 
  */
 export const getAllNhanVien = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const nhanViens = await NhanVien.find();
-        res.json(nhanViens);
+        // eslint-disable-next-line prefer-const
+        let { page = 1, limit = 10, search = "" } = req.query;
+        page = Number(page);
+        limit = Number(limit);
+        const query: FilterQuery<unknown> = {};
+
+        // Thêm điều kiện tìm kiếm
+        if (search) {
+            query.$or = [
+                { hoTenNV: { $regex: search, $options: "i" } }, // Tìm theo họ tên
+                { soDienThoai: { $regex: search, $options: "i" } } // Tìm theo số điện thoại
+            ];
+        }
+
+        const total = await NhanVien.countDocuments(query);
+        const nhanVienList = await NhanVien.find(query)
+        .select("-password")
+        .skip((page - 1) * limit)
+        .limit(limit);
+        const hasMore = page * limit < total;
+        res.status(200).json({ 
+            total, 
+            page,
+            limit, 
+            totalPages: Math.ceil(total / limit), 
+            hasMore, 
+            data: nhanVienList 
+        });
     } catch (error) {
         next(error);
     }
@@ -127,7 +152,7 @@ export const getAllNhanVien = async (req: Request, res: Response, next: NextFunc
  */
 export const getNhanVienById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const nhanVien = await NhanVien.findOne({ maNV: req.params.maNV });
+        const nhanVien = await NhanVien.findOne({ maNV: req.params.maNV }).select("-password");
 
         if (!nhanVien) {
             res.status(404);
@@ -151,21 +176,94 @@ export const updateNhanVien = async (req: Request, res: Response, next: NextFunc
         const updatedData = req.body;
 
         if (updatedData.password) {
-            updatedData.password = await bcrypt.hash(updatedData.password, 10);
+            res.status(400);
+            throw new Error("Phải cập nhật mật khẩu qua changePassword");
         }
 
-        const updatedNhanVien = await NhanVien.findOneAndUpdate(
-            { maNV },
-            updatedData,
-            { new: true }
-        );
+        const nhanVien = await NhanVien.findOne({ maNV });
 
-        if (!updatedNhanVien) {
+        if (!nhanVien) {
             res.status(404);
             throw new Error("Không tìm thấy nhân viên");
         }
 
-        res.json(updatedNhanVien);
+        Object.assign(nhanVien, updatedData);
+        await nhanVien.save();
+
+        res.json({message: "Cập nhật thông tin nhân viên thành công", nhanVien});
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ *  Thay đổi mật khẩu nhân viên
+ *  @route PATCH /api/nhan-vien/:id/change-password
+ *  @access nhanVien (Only owner) or Quản lý
+ */
+export const changePasswordNhanVien = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { oldPassword, newPassword } = req.body;
+
+        // Kiểm tra user tồn tại
+        const nhanVien = await NhanVien.findOne({ maDG: id });
+        if (!nhanVien) {
+            res.status(404);
+            throw new Error("Không tìm thấy nhân viên");
+        }
+
+        // Chỉ cho phép nhân viên đổi mật khẩu chính mình hoặc người dùng là quản lý
+        if (req.user?.maNguoiDung !== id || req.user?.role !== USER_ROLES.QUANLY) {
+            res.status(403);
+            throw new Error("Bạn không có quyền thay đổi mật khẩu cho người khác");
+        }
+
+        // Kiểm tra mật khẩu cũ
+        const isMatch = await nhanVien.comparePassword(oldPassword);
+        if (!isMatch) {
+            res.status(400);
+            throw new Error("Mật khẩu cũ không đúng");
+        }
+
+        // Cập nhật mật khẩu mới
+        nhanVien.password = newPassword;
+        await nhanVien.save();
+
+        res.json({ success: true, message: "Đổi mật khẩu thành công" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ *  Reset mật khẩu nhân viên
+ *  @route PATCH /api/nhan-vien/:id/reset-password
+ *  @access Quản lý
+ */
+export const resetPasswordNhanVien = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { newPassword } = req.body;
+
+        // Kiểm tra user tồn tại
+        const nhanVien = await NhanVien.findOne({ maDG: id });
+        if (!nhanVien) {
+            res.status(404);
+            throw new Error("Không tìm thấy nhân viên");
+        }
+
+        // Chỉ cho phép quản lý reset mật khẩu
+        if (req.user?.role !== USER_ROLES.QUANLY) {
+            res.status(403);
+            throw new Error("Chỉ có quản lý mới có quyền reset mật khẩu");
+        }
+
+        // Cập nhật mật khẩu mới
+        nhanVien.password = newPassword;
+        await nhanVien.save();
+
+        res.json({ success: true, message: "Reset mật khẩu thành công" });
     } catch (error) {
         next(error);
     }

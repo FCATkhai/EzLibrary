@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 
 import dotenv from 'dotenv';
 import { IUser } from "../../../shared/interface";
+import { USER_ROLES } from "../config/constants";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET as jwt.Secret;
@@ -63,8 +64,11 @@ export const authorize = (allowedRoles: string[] = []) => {
                 res.status(403);
                 throw new Error("Forbidden - Bạn không có quyền thực hiện thao tác này");
             }
-
-            req.user = { ...user.toObject(), role: decoded.role };
+            if (decoded.role === USER_ROLES.DOCGIA) {
+                req.user = { ...user.toObject(), role: decoded.role, maNguoiDung: decoded.maDG };
+            } else {
+                req.user = { ...user.toObject(), role: decoded.role, maNguoiDung: decoded.maNV };
+            }
             next();
         } catch (error) {
             next(error);

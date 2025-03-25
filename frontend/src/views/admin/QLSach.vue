@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ref, onMounted, useTemplateRef, watch } from "vue";
-import { useRouter } from "vue-router";
 import { useSachAdmin } from "@/composables/admin/useSachAdmin";
 import { useNXBAdmin } from "@/composables/admin/useNXBAdmin";
 import { useToast } from "vue-toastification";
@@ -29,12 +28,12 @@ const {
 
 } = useNXBAdmin();
 
-const router = useRouter();
 const toast = useToast();
 
 type ModalStatus = "adding" | "editing";
 const modalStatus = ref<ModalStatus>("adding");
 const closeModalBtn = useTemplateRef("closeModalBtn");
+const closeDeleteModalBtn = useTemplateRef("closeDeleteModalBtn");
 
 const formStep = ref(1); // Lưu bước thực hiện trong form
 
@@ -50,6 +49,7 @@ const tenNXB = ref("");
 const tacGia = ref("");
 const file = ref<File | null>(null); // Để upload ảnh
 const editingId = ref<string | null>(null);
+const errorMessage = ref<string | null>(null);
 
 const showInfoModal = (sach: ISach) => {
     sachRef.value = sach;
@@ -81,6 +81,12 @@ const showModal = (status: ModalStatus, id: string = "") => {
     if (modal) modal.showModal();
 };
 
+const showDeleteModal = (maDG: string) => {
+    editingId.value = maDG;
+    const modal = document.getElementById("delete_modal") as HTMLDialogElement;
+    if (modal) modal.showModal();
+};
+
 const handleFileChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
     file.value = target.files ? target.files[0] : null;
@@ -105,12 +111,24 @@ const handleSubmit = async () => {
             await editSach(editingId.value, formData);
             toast.success("Cập nhật sách thành công");
         }
-        // resetForm();
+        resetForm();
         closeModalBtn.value?.click();
     } catch (error: any) {
         toast.error(error.response?.data?.message || "Lỗi khi xử lý sách");
     }
 
+};
+
+const handleDelete = async () => {
+    if (!editingId.value) return;
+    try {
+        await removeSach(editingId.value);
+        toast.success("Xóa sách thành công");
+        editingId.value = null;
+        closeDeleteModalBtn.value?.click();
+    } catch (error: any) {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa sách");
+    }
 };
 
 const resetForm = () => {
@@ -123,16 +141,13 @@ const resetForm = () => {
     soQuyen.value = null;
     namXuatBan.value = null;
     file.value = null;
+
     editingId.value = null;
     formStep.value = 1;
+    errorMessage.value = null;
 };
 
-const handleDelete = async (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa sách này không?")) {
-        await removeSach(id);
-        toast.success("Xóa sách thành công");
-    }
-};
+
 
 const nextPage = () => {
     if (page.value < totalPages.value) {
@@ -170,7 +185,7 @@ onMounted(() => {
 <template>
     <div class="p-4">
         <h1 class="text-xl font-bold mb-4">Quản lý Sách</h1>
-        <button @click="showModal('adding')" class="my-4 btn btn-success block">Thêm Sách</button>
+        <button @click="showModal('adding')" class="my-4 btn btn-success block" :disabled="loading">Thêm Sách</button>
         <input v-model="searchTerm" placeholder="Tìm kiếm theo tên hoặc tác giả..." class="input input-bordered mb-4" />
         <template v-if="loading">
             <p>Đang tải</p>
@@ -207,14 +222,14 @@ onMounted(() => {
                         <button @click="showInfoModal(sach)" class="btn btn-info mr-2">Xem chi tiết</button>
                         <button @click="showModal('editing', sach.maSach)"
                             class="btn btn-warning btn-sm mr-2">Sửa</button>
-                        <button @click="handleDelete(sach.maSach)" class="btn btn-error btn-sm">Xóa</button>
+                        <button @click="showDeleteModal(sach.maSach)" class="btn btn-error btn-sm">Xóa</button>
                     </td>
                 </tr>
             </tbody>
         </table>
 
         <div class="mt-4 flex justify-between">
-            <button @click="prevPage" :disabled="page === 1" class="btn btn-outline">Trước</button>
+            <button @click="prevPage" :disabled="page === 1 || loading" class="btn btn-outline">Trước</button>
             <span>Trang {{ page }} / {{ totalPages }}</span>
             <button @click="nextPage" :disabled="page === totalPages || loading" class="btn btn-outline">Sau</button>
         </div>
@@ -237,7 +252,7 @@ onMounted(() => {
                                 class="input input-bordered mt-4 block mx-auto" />
                             <p>{{ searchTermNXB }}</p>
                             <div class="flex">
-                                <button @click="prevPageNXB" :disabled="page === 1" class="my-auto btn">«</button>
+                                <button @click="prevPageNXB" :disabled="pageNXB === 1" class="my-auto btn">«</button>
                                 <table class="table w-5/6 mt-4 mx-auto border">
                                     <thead>
                                         <tr class="bg-gray-200">
@@ -255,7 +270,7 @@ onMounted(() => {
                                         </tr>
                                     </tbody>
                                 </table>
-                                <button @click="nextPageNXB" :disabled="page === totalPages"
+                                <button @click="nextPageNXB" :disabled="pageNXB === totalPagesNXB"
                                     class="my-auto btn">»</button>
 
                             </div>
@@ -267,22 +282,22 @@ onMounted(() => {
                     <div v-if="formStep == 2">
                         <h1 class="text-base font-bold">Nhập thông tin sách</h1>
 
-                        <label class="fieldset-label text-lg">Tên Sách</label>
+                        <label class="fieldset-label text-lg">Tên Sách<span class="text-error">*</span></label>
                         <input class="input w-full" v-model="tenSach" type="text" required />
                         <label class="fieldset-label text-lg">Mã NXB</label>
                         <input class="input w-full" v-model="maNXB" type="text" required readonly disabled />
-                        <label class="fieldset-label text-lg">Tác giả</label>
+                        <label class="fieldset-label text-lg">Tác giả<span class="text-error">*</span></label>
                         <input class="input w-full" v-model="tacGia" type="text" required />
-                        <label class="fieldset-label text-lg">Mô tả</label>
-                        <textarea class="textarea w-full" rows="10" v-model="moTa"></textarea>
-                        <label class="fieldset-label text-lg">Số trang</label>
-                        <input class="input w-full" v-model="soTrang" type="number" min="1" />
-                        <label class="fieldset-label text-lg">Số quyển</label>
-                        <input class="input w-full" v-model="soQuyen" type="number" min="1" />
-                        <label class="fieldset-label text-lg">Năm xuất bản</label>
-                        <input class="input w-full" v-model="namXuatBan" type="number" min="1900" max="9999" />
+                        <label class="fieldset-label text-lg">Mô tả<span class="text-error">*</span></label>
+                        <textarea class="textarea w-full" rows="10" v-model="moTa" required></textarea>
+                        <label class="fieldset-label text-lg">Số trang<span class="text-error">*</span></label>
+                        <input class="input w-full" v-model="soTrang" type="number" min="1" required/>
+                        <label class="fieldset-label text-lg">Số quyển<span class="text-error">*</span></label>
+                        <input class="input w-full" v-model="soQuyen" type="number" min="1" required/>
+                        <label class="fieldset-label text-lg">Năm xuất bản<span class="text-error">*</span></label>
+                        <input class="input w-full" v-model="namXuatBan" type="number" min="1900" max="9999" required/>
                         <label class="fieldset-label text-lg">Ảnh (nếu có)</label>
-                        <input class="input w-full" type="file" @change="handleFileChange" accept="image/*" />
+                        <input class="file-input w-full" type="file" @change="handleFileChange" accept="image/*" />
                     </div>
                     <div class="flex justify-center mt-10">
                         <button :disabled="formStep <= 1" @click="formStep--" class="btn btm-sm btn-soft"><i
@@ -298,9 +313,15 @@ onMounted(() => {
 
 
                     <div class="modal-action">
-                        <button v-if="formStep == 2" class="btn btn-primary" type="submit">Submit</button>
+                        <div v-if="loading">
+                            <span class="loading loading-spinner loading-xl"></span>
+                            <p>Loading</p>
+                        </div>
+                        <button v-if="formStep == 2" class="btn btn-primary" type="submit" :disabled="loading">
+                            Submit
+                        </button>
                         <form method="dialog">
-                            <button ref="closeModalBtn" @click="resetForm" class="btn">Hủy</button>
+                            <button ref="closeModalBtn" @click="resetForm" class="btn" :disabled="loading">Hủy</button>
                         </form>
                     </div>
                 </form>
@@ -308,6 +329,25 @@ onMounted(() => {
         </div>
     </dialog>
 
+    <!-- Delete Confirmation Modal -->
+    <dialog id="delete_modal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <fieldset class="mx-auto fieldset w-lg bg-base-200 border border-base-300 p-4 rounded-box">
+                <legend class="fieldset-legend text-xl font-bold">Xác Nhận Xóa</legend>
+                <p class="text-lg mb-4">Bạn có chắc chắn muốn xóa sách này không?</p>
+                <div class="modal-action">
+                    <div v-if="loading">
+                        <span class="loading loading-spinner loading-xl"></span>
+                        <p>Loading</p>
+                    </div>
+                    <button class="btn btn-error" @click="handleDelete" :disabled="loading">Xóa</button>
+                    <form method="dialog">
+                        <button ref="closeDeleteModalBtn" class="btn" @click="editingId = null" :disabled="loading">Hủy</button>
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+    </dialog>
 
     <!-- Model xem thông tin sách -->
     <dialog id="info_modal" class="modal">
@@ -331,16 +371,16 @@ onMounted(() => {
                         <tr>
                             <th>NXB</th>
                             <td>{{
-                            //@ts-ignore
-                            sachRef.maNXB.tenNXB
-                            }}</td>
+                                //@ts-ignore
+                                sachRef.maNXB.tenNXB
+                                }}</td>
                         </tr>
                         <tr class="h-30">
                             <th>Mô tả</th>
                             <td>
                                 <textarea class="w-full" rows="7" readonly>
-                                    {{ sachRef.moTa }}
-                                </textarea>
+                                {{ sachRef.moTa }}
+                            </textarea>
                             </td>
                         </tr>
                         <tr>

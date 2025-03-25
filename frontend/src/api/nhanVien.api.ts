@@ -53,6 +53,28 @@ export const updateNhanVien = async (maNV: string, data: Partial<INhanVien>) => 
 };
 
 /**
+ * Thay đổi mật khẩu
+ * @param maNV Mã nhân viên cần cập nhật
+ * @param data password cũ và password mới
+ * @returns message thông báo
+ */
+export const changePasswordNhanVien = async (maNV: string, data: { oldPassword: string, newPassword: string }) => {
+    const response = await axios.put<{ message: string }>(`${API_URL}/${maNV}/change-password`, data);
+    return response.data;
+};
+
+/**
+ * Reset mật khẩu
+ * @param maNV Mã nhân viên cần cập nhật
+ * @param data password mới
+ * @returns message thông báo
+ */
+export const resetPasswordNhanVien = async (maNV: string, data: { newPassword: string }) => {
+    const response = await axios.put<{ message: string }>(`${API_URL}/${maNV}/reset-password`, data);
+    return response.data;
+};
+
+/**
  * Xóa nhân viên (Chỉ Quản lý)
  * @param maNV Mã nhân viên cần xóa
  * @returns Thông báo xóa thành công

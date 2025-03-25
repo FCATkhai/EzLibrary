@@ -12,10 +12,10 @@ export const createDocGia = async (data: {
     hoLot: string;
     ten: string;
     soDienThoai: string;
-    password: string;
-    ngaySinh: string;
-    phai: string;
-    diaChi: string;
+    password?: string;
+    ngaySinh?: string;
+    phai?: string;
+    diaChi?: string;
 }) => {
     const response = await axios.post<{ message: string; docGia: IDocGia }>(
         `${API_URL}/register`,
@@ -28,8 +28,8 @@ export const createDocGia = async (data: {
  * Lấy danh sách tất cả độc giả (Chỉ Quản lý)
  * @returns Danh sách độc giả
  */
-export const getAllDocGia = async () => {
-    const response = await axios.get<IDocGia[]>(API_URL);
+export const getAllDocGia = async (params: { page?: number; limit?: number; search?: string }) => {
+    const response = await axios.get(API_URL, { params });
     return response.data;
 };
 
@@ -44,7 +44,7 @@ export const getDocGiaById = async (maDG: string) => {
 };
 
 /**
- * Cập nhật thông tin độc giả (Chỉ chính độc giả)
+ * Cập nhật thông tin độc giả (Chỉ chính độc giả) hoặc quản lý
  * @param maDG Mã độc giả cần cập nhật
  * @param data Dữ liệu cập nhật
  * @returns Độc giả sau khi cập nhật
@@ -54,6 +54,28 @@ export const updateDocGia = async (maDG: string, data: Partial<IDocGia>) => {
         `${API_URL}/${maDG}`,
         data
     );
+    return response.data;
+};
+
+/**
+ * Thay đổi mật khẩu
+ * @param maDG Mã độc giả cần cập nhật
+ * @param data password cũ và password mới
+ * @returns message thông báo
+ */
+export const changePasswordDocGia = async (maDG: string, data: { oldPassword: string, newPassword: string }) => {
+    const response = await axios.patch<{ message: string }>(`${API_URL}/${maDG}/change-password`, data);
+    return response.data;
+};
+
+/**
+ * Reset mật khẩu
+ * @param maDG Mã độc giả cần cập nhật
+ * @param data password mới
+ * @returns message thông báo
+ */
+export const resetPasswordDocGia = async (maDG: string, data: { newPassword: string }) => {
+    const response = await axios.patch<{ message: string }>(`${API_URL}/${maDG}/reset-password`, data);
     return response.data;
 };
 

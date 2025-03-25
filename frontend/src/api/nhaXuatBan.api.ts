@@ -18,7 +18,7 @@ export const getAllNhaXuatBan = async (params: {page: number, limit: number, sea
  * @returns Thông tin chi tiết của nhà xuất bản
  */
 export const getNhaXuatBanById = async (id: string) => {
-    const response = await axios.get(`${API_URL}/${id}`);
+    const response = await axios.get<INhaXuatBan>(`${API_URL}/${id}`);
     return response.data;
 };
 
@@ -27,8 +27,8 @@ export const getNhaXuatBanById = async (id: string) => {
  * @param data Thông tin nhà xuất bản cần tạo
  * @returns Nhà xuất bản vừa được tạo
  */
-export const createNhaXuatBan = async (data: { tenNXB: string; diaChi: string }) => {
-    const response = await axios.post<INhaXuatBan>(API_URL, data);
+export const createNhaXuatBan = async (data: { tenNXB: string; diaChi?: string }) => {
+    const response = await axios.post<{message: string; nhaXuatBan: INhaXuatBan}>(API_URL, data);
     return response.data;
 };
 
@@ -39,7 +39,7 @@ export const createNhaXuatBan = async (data: { tenNXB: string; diaChi: string })
  * @returns Nhà xuất bản sau khi cập nhật
  */
 export const updateNhaXuatBan = async (id: string, data: Partial<INhaXuatBan>) => {
-    const response = await axios.put<INhaXuatBan>(`${API_URL}/${id}`, data);
+    const response = await axios.put<{message: string; nhaXuatBan: INhaXuatBan}>(`${API_URL}/${id}`, data);
     return response.data;
 };
 

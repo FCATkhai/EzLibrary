@@ -36,7 +36,7 @@ const cloudinaryUploadImage = async (filePath: string, folderName: string) => {
         {
             folder: `EzLibrary/${folderName}`,
             resource_type: "auto",
-            transformation: [{ width: 300, height: 450, crop: "limit" }],
+            transformation: [{background: "white", height: 450, width: 300, crop: "pad" }],
         },
     )
 };

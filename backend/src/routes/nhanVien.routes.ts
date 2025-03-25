@@ -6,19 +6,23 @@ import {
     updateNhanVien,
     deleteNhanVien,
     loginNhanVien,
-    logoutNhanVien
+    logoutNhanVien,
+    changePasswordNhanVien,
+    resetPasswordNhanVien
 } from "../controllers/nhanVien.controller";
-import { authorize } from "../middleware/auth.middleware"; // Middleware xác thực
+import { authorize } from "../middleware/auth.middleware"; 
 import { USER_GROUPS } from "../config/constants";
 const router = express.Router();
 
-router.post("/register", createNhanVien); // Đăng ký nhân viên mới
+router.post("/register", createNhanVien);
 router.post("/login", loginNhanVien);
 router.post("/logout", logoutNhanVien);
 
-router.get("/", authorize(USER_GROUPS.QUANLY), getAllNhanVien); // Lấy danh sách nhân viên (Chỉ Quản lý)
-router.get("/:maNV", authorize(USER_GROUPS.QUANLY), getNhanVienById); // Lấy thông tin nhân viên (Chỉ Quản lý)
-router.put("/:maNV", authorize(USER_GROUPS.QUANLY), updateNhanVien); // Cập nhật nhân viên (Chỉ Quản lý)
-router.delete("/:maNV", authorize(USER_GROUPS.QUANLY), deleteNhanVien); // Xóa nhân viên (Chỉ Quản lý)
+router.get("/:maNV", authorize(USER_GROUPS.QUANLY), getNhanVienById);
+router.get("/", authorize(USER_GROUPS.QUANLY), getAllNhanVien);
+router.put("/:maNV", authorize(USER_GROUPS.QUANLY), updateNhanVien);
+router.patch("/:maNV/change-password", authorize(USER_GROUPS.NV_QL), changePasswordNhanVien);
+router.patch("/:maNV/reset-password", authorize(USER_GROUPS.QUANLY), resetPasswordNhanVien);
+router.delete("/:maNV", authorize(USER_GROUPS.QUANLY), deleteNhanVien);
 
 export default router;

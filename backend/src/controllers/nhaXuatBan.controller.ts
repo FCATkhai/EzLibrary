@@ -56,7 +56,7 @@ export const getNhaXuatBanById = async (req: Request, res: Response, next: NextF
             res.status(404);
             throw new Error("Không tìm thấy nhà xuất bản");
         }
-        res.status(200).json({data: nhaXuatBan});
+        res.status(200).json(nhaXuatBan);
     } catch (error) {
         next(error);
     }
@@ -80,7 +80,7 @@ export const createNhaXuatBan = async (req: Request, res: Response, next: NextFu
         const maNXB = "NXB-" + generateId();
 
         const nhaXuatBan = await NhaXuatBan.create({ maNXB, tenNXB, diaChi });
-        res.status(201).json(nhaXuatBan);
+        res.status(201).json({ message: "Tạo nhà xuất bản thành công", nhaXuatBan });
     } catch (error) {
         next(error);
     }
@@ -104,7 +104,7 @@ export const updateNhaXuatBan = async (req: Request, res: Response, next: NextFu
         nhaXuatBan.diaChi = req.body.diaChi || nhaXuatBan.diaChi;
 
         const updatedNhaXuatBan = await nhaXuatBan.save();
-        res.status(200).json(updatedNhaXuatBan);
+        res.status(200).json({ message: "Cập nhật thông tin NXB thành công", updatedNhaXuatBan });
     } catch (error) {
         // Check for duplicate key error (E11000)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

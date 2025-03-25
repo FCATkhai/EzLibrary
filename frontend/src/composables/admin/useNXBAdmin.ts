@@ -22,7 +22,7 @@ export function useNXBAdmin() {
 
     const fetchNXBs = async (reset = false) => {
 
-        if (!hasMore.value || loading.value) return;
+        if (loading.value) return;
         if (reset) {
             nhaXuatBans.value = [];
             page.value = 1;
@@ -36,7 +36,7 @@ export function useNXBAdmin() {
                 limit: limit.value,
                 search: searchTerm.value
             });
-            console.log("response: ", res);
+            // console.log("response: ", res);
             nhaXuatBans.value = res.data;
             totalPages.value = res.totalPages;
             hasMore.value = res.hasMore;
@@ -57,7 +57,7 @@ export function useNXBAdmin() {
         loading.value = true;
         try {
             const res = await getNhaXuatBanById(id);
-            nhaXuatBan.value = res.data;
+            nhaXuatBan.value = res;
         } catch (error) {
             console.error("Lỗi khi tải nhà xuất bản", error);
             throw error;
@@ -67,17 +67,17 @@ export function useNXBAdmin() {
     }
 
     // Tạo NXB
-    const addNXB = async (data: { tenNXB: string; diaChi: string }) => {
+    const addNXB = async (data: { tenNXB: string; diaChi?: string }) => {
         loading.value = true;
         try {
-            const newNXB = await createNhaXuatBan(data);
-            fetchNXBs();
-            return newNXB;
+            const result = await createNhaXuatBan(data);
+            return result.nhaXuatBan;
         } catch (error) {
             console.error('Lỗi khi tạo nhà xuất bản:', error);
             throw error;
         } finally {
             loading.value = false;
+            await fetchNXBs(true);
         }
     };
 
@@ -85,14 +85,14 @@ export function useNXBAdmin() {
     const editNXB = async (maNXB: string, data: Partial<INhaXuatBan>) => {
         loading.value = true;
         try {
-            const updatedNXB = await updateNhaXuatBan(maNXB, data);
-            fetchNXBs();
-            return updatedNXB;
+            const result = await updateNhaXuatBan(maNXB, data);
+            return result.nhaXuatBan;
         } catch (error) {
             console.error('Lỗi khi cập nhật nhà xuất bản:', error);
             throw error;
         } finally {
             loading.value = false;
+            await fetchNXBs();
         }
     };
 
@@ -100,12 +100,12 @@ export function useNXBAdmin() {
         loading.value = true;
         try {
             await deleteNhaXuatBan(maNXB);
-            fetchNXBs();
         } catch (error) {
             console.error('Lỗi khi xóa nhà xuất bản:', error);
             throw error;
         } finally {
             loading.value = false;
+            await fetchNXBs();
         }
     };
 

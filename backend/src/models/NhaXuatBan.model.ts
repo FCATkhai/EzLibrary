@@ -4,7 +4,7 @@ import { INhaXuatBan } from '~/shared/interface';
 const NhaXuatBanSchema = new Schema<INhaXuatBan>({
     maNXB: { type: String, required: true, unique: true },
     tenNXB: { type: String, required: true, unique: true },
-    diaChi: { type: String, required: true },
+    diaChi: { type: String},
 });
 
 const NhaXuatBan: Model<INhaXuatBan> = mongoose.model<INhaXuatBan>("NhaXuatBan", NhaXuatBanSchema);
