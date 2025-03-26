@@ -1,22 +1,29 @@
 <template>
     <div class="container mx-auto p-4">
-        <div v-if="sach" class="bg-white p-6 rounded-lg shadow-lg">
-            <img :src="sach.coverUrl" alt="Bìa sách" class="w-48 h-64 mx-auto mb-4 rounded-md" />
-            <h1 class="text-2xl font-bold text-center">{{ sach.tenSach }}</h1>
-            <p class="text-gray-600 text-center">Tác giả: {{ sach.tacGia }}</p>
-            <p class="text-gray-600 text-center">Năm xuất bản: {{ sach.namXuatBan }}</p>
-            <p class="text-gray-600 text-center">Nhà xuất bản:
-                {{
-                    // @ts-ignore
-                    sach.maNXB?.tenNXB || "Không xác định"
-                }}</p>
-            <p class="text-gray-600 text-center">Mô tả: {{ sach.moTa }}</p>
-            <button class="btn btn-primary w-full mt-4" :disabled="loading" @click="muonSach">
-                {{ loading ? "Đang xử lý..." : "Mượn sách" }}
-            </button>
+        <div v-if="sach" class="flex bg-white p-6 rounded-lg shadow-lg">
+            <img :src="sach.coverUrl" alt="Bìa sách" class="w-3/10 mx-auto mb-4 rounded-md" />
+            <div class="flex flex-col ml-20 gap-3">
+                <h1 class="text-2xl font-bold">{{ sach.tenSach }}</h1>
+                <p class="text-gray-600">Tác giả: {{ sach.tacGia }}</p>
 
-            <p v-if="message" class="text-green-500 text-center mt-2">{{ message }}</p>
-            <p v-if="error" class="text-red-500 text-center mt-2">{{ error }}</p>
+                <p class="text-gray-600">Nhà xuất bản:
+                    {{
+                        // @ts-ignore
+                        sach.maNXB?.tenNXB || "Không xác định"
+                    }}
+                </p>
+                <p class="text-gray-600">Số trang: {{ sach.soTrang }}</p>
+                <p class="text-gray-600">Năm xuất bản: {{ sach.namXuatBan }}</p>
+                <p class="text-gray-600">Mô tả: {{ sach.moTa }}</p>
+                <p class="text-gray-600">Kho: {{ sach.soQuyen }}</p>
+                <button class="btn btn-primary mt-4 w-30" :disabled="loading || sach.soQuyen <= 0" @click="muonSach">
+                    {{ loading ? "Đang xử lý..." : "Mượn sách" }}
+                </button>
+                <p v-if="sach.soQuyen <= 0">Sách đã hết, vui lòng quay lại sau</p>
+
+                <p v-if="message" class="text-green-500 text-center mt-2">{{ message }}</p>
+                <p v-if="error" class="text-red-500 text-center mt-2">{{ error }}</p>
+            </div>
         </div>
 
         <div v-else class="text-center">
@@ -52,7 +59,7 @@ const muonSach = async () => {
     message.value = "";
 
     try {
-        await createPhieuMuon_DG({maSach: sach.value!.maSach});
+        await createPhieuMuon_DG({ maSach: sach.value!.maSach });
         message.value = "Mượn sách thành công! Vui lòng chờ xác nhận.";
     } catch (err) {
         error.value = "Không thể mượn sách. Vui lòng thử lại.";

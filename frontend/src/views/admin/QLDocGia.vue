@@ -239,14 +239,15 @@ onMounted(() => {
                     <label class="fieldset-label text-lg">Tên<span class="text-error">*</span></label>
                     <input class="input w-full" v-model="ten" type="text" required />
                     <label class="fieldset-label text-lg">Số Điện Thoại<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="soDienThoai" type="text" minlength="10" maxlength="10" required />
+                    <input class="input w-full" v-model="soDienThoai" type="tel" pattern="[0-9]*" oninvalid="this.setCustomValidity('Vui lòng chỉ nhập số (0-9)');"
+                    oninput="this.setCustomValidity('');" minlength="10"  maxlength="10" required />
                     <label v-if="modalStatus == 'adding'" class="fieldset-label text-lg">Mật Khẩu<span class="text-error">*</span></label>
                     <input v-if="modalStatus == 'adding'" class="input w-full" v-model="password" :type="modalStatus === 'adding' ? 'password' : 'text'" :required="modalStatus === 'adding'" />
                     <label class="fieldset-label text-lg">Ngày Sinh</label>
                     <input class="input w-full" v-model="ngaySinh" type="date" />
                     <label class="fieldset-label text-lg">Phái</label>
                     <select class="select w-full" v-model="phai">
-                        <option value="">Không chọn</option>
+                        <option value="Khác">Khác</option>
                         <option value="Nam">Nam</option>
                         <option value="Nữ">Nữ</option>
                     </select>

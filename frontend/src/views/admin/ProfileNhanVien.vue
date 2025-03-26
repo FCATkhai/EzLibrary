@@ -101,7 +101,8 @@ const updatePassword = async () => {
             <input v-model="editedInfo.diaChi" class="w-full p-2 border rounded-lg mb-3" :disabled="!isEditing" />
 
             <label class="block mb-2 text-sm font-medium text-gray-700">Số điện thoại</label>
-            <input v-model="editedInfo.soDienThoai" class="w-full p-2 border rounded-lg mb-3" :disabled="!isEditing" />
+            <input v-model="editedInfo.soDienThoai" type="tel" pattern="[0-9]*" oninvalid="this.setCustomValidity('Vui lòng chỉ nhập số (0-9)');"
+            oninput="this.setCustomValidity('');" class="w-full p-2 border rounded-lg mb-3" :disabled="!isEditing" />
 
             <!-- Nút Chỉnh sửa / Cập nhật -->
             <div class="flex gap-2">

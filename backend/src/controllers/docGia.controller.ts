@@ -73,6 +73,7 @@ export const loginDocGia = async (req: Request, res: Response, next: NextFunctio
         });
 
         res.json({
+            success: true,
             message: "Đăng nhập thành công",
             docGia: {
                 maDG: docGia.maDG,

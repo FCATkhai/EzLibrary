@@ -77,6 +77,7 @@ export const loginNhanVien = async (req: Request, res: Response, next: NextFunct
         });
 
         res.json({ 
+            success: true,
             message: "Đăng nhập thành công", 
             nhanVien: {
                 maNV: nhanVien.maNV,

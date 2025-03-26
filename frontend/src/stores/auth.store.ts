@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { loginDG, logoutDG, loginNV, logoutNV } from "@/api/auth.api";
 import type { IDocGia, INhanVien, IUser } from "~/shared/interface";
 import { USER_ROLES, type UserRole } from "~/shared/userRoles";
+import type { AxiosError } from "axios";
 
 interface AuthState {
     user: { maNguoiDung: string; hoTen: string; role: UserRole } | null;
@@ -19,6 +20,8 @@ export const useAuthStore = defineStore("auth", {
             try {
                 if (role == USER_ROLES.DOCGIA) {
                     const res = await loginDG(soDienThoai, password);
+                    //@ts-ignore
+                    if (!res.success) throw new Error(res.message);
                     const docGia: IDocGia = res.docGia;
                     this.user = {
                         maNguoiDung: docGia.maDG,
@@ -29,6 +32,8 @@ export const useAuthStore = defineStore("auth", {
                 }
                 if (role == USER_ROLES.NHANVIEN) {
                     const res = await loginNV(soDienThoai, password);
+                    //@ts-ignore
+                    if (!res.success) throw new Error(res.message);
                     const nhanVien: INhanVien = res.nhanVien;
                     this.user = {
                         maNguoiDung: nhanVien.maNV,
@@ -39,7 +44,8 @@ export const useAuthStore = defineStore("auth", {
                 }
 
             } catch (error) {
-                throw new Error(`Đăng nhập thất bại, Error: ${error}`);
+                //@ts-ignore
+                throw new Error(error?.response?.data?.message || "Đăng nhập thất bại");
             }
         },
 

@@ -34,6 +34,9 @@
             <li>
                 <RouterLink to="/About">About</RouterLink>
             </li>
+            <li v-if="role === USER_ROLES.NHANVIEN || role === USER_ROLES.QUANLY">
+                <RouterLink to="/admin">Quản lý</RouterLink>
+            </li>
             <div v-if="authStore.isAuthenticated" class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                     <div class="w-10 rounded-full align-middle">
@@ -45,7 +48,7 @@
                         <RouterLink :to="profileLink">Hồ sơ</RouterLink>
                     </li>
                     <li v-if="role === USER_ROLES.DOCGIA">
-                        <RouterLink :to="{name: 'phieu-muon'}">Xem phiếu mượn</RouterLink>
+                        <RouterLink :to="{ name: 'phieu-muon' }">Xem phiếu mượn</RouterLink>
                     </li>
                     <li>
                         <RouterLink @click="authStore.logout" :to="{ name: 'home' }" class="bg-red-500">Logout

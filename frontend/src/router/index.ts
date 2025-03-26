@@ -42,20 +42,28 @@ const routes = [
         }
     },
     {
+        path: '/register',
+        name: 'register',
+        component: () => import('@/views/Auth/RegisterDocGiaView.vue'),
+        meta: {
+            layout: BlankLayout
+        }
+    },
+    {
         path: '/login',
         name: 'login',
-        component: () => import('@/views/Login/LoginView.vue'),
+        component: () => import('@/views/Auth/LoginView.vue'),
         meta: {
             layout: BlankLayout
         }
     },
     {
         path: "/login/doc-gia",
-        component: () => import("@/views/Login/LoginDocGia.vue"),
+        component: () => import("@/views/Auth/LoginDocGia.vue"),
     },
     {
         path: "/login/nhan-vien",
-        component: () => import("@/views/Login/LoginNhanVien.vue"),
+        component: () => import("@/views/Auth/LoginNhanVien.vue"),
     },
     {
         path: '/sach/:maSach',

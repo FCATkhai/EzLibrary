@@ -13,6 +13,10 @@ const docGia = ref(null);
 const activeTab = ref("profile");
 const isEditing = ref(false);
 
+const formatDate = (isoString) => {
+    return isoString ? isoString.split("T")[0] : "";
+};
+
 const editedInfo = ref({
     hoLot: "",
     ten: "",
@@ -32,9 +36,8 @@ const passwordData = ref({
 onMounted(async () => {
     if (userId.value) {
         docGia.value = await fetchDocGia({ maDG: userId.value });
-        console.log(docGia.value);
         if (docGia.value) {
-            editedInfo.value = { ...docGia.value };
+            editedInfo.value = { ...docGia.value, ngaySinh: formatDate(docGia.value.ngaySinh) };
         }
     }
 });
@@ -99,7 +102,8 @@ const updatePassword = async () => {
             <input v-model="editedInfo.ten" class="w-full p-2 border rounded-lg mb-3" :disabled="!isEditing" />
 
             <label class="block mb-2 text-sm font-medium text-gray-700">Số điện thoại</label>
-            <input v-model="editedInfo.soDienThoai" class="w-full p-2 border rounded-lg mb-3" :disabled="!isEditing" />
+            <input v-model="editedInfo.soDienThoai" type="tel" pattern="[0-9]*" oninvalid="this.setCustomValidity('Vui lòng chỉ nhập số (0-9)');"
+            oninput="this.setCustomValidity('');" class="w-full p-2 border rounded-lg mb-3" :disabled="!isEditing" />
 
             <label class="block mb-2 text-sm font-medium text-gray-700">Ngày sinh</label>
             <input type="date" v-model="editedInfo.ngaySinh" class="w-full p-2 border rounded-lg mb-3"
