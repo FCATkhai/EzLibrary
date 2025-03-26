@@ -1,7 +1,6 @@
 //@ts-nocheck
 
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import BlankLayout from '@/layouts/BlankLayout.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
@@ -13,7 +12,31 @@ const routes = [
     {
         path: '/',
         name: 'home',
-        component: HomeView,
+        component: () => import('@/views/HomeView.vue'),
+        meta: {
+            layout: AppLayout
+        }
+    },
+    {
+        path: '/about',
+        name: 'about',
+        component: () => import('@/views/AboutView.vue'),
+        meta: {
+            layout: AppLayout
+        }
+    },
+    {
+        path: '/phieu-muon',
+        name: 'phieu-muon',
+        component: () => import('@/views/PhieuMuonView.vue'),
+        meta: {
+            layout: AppLayout
+        }
+    },
+    {
+        path: '/profile',
+        name: 'user-profile',
+        component: () => import('@/views/UserProfileView.vue'),
         meta: {
             layout: AppLayout
         }
@@ -21,10 +44,18 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: () => import('@/views/LoginView.vue'),
+        component: () => import('@/views/Login/LoginView.vue'),
         meta: {
             layout: BlankLayout
         }
+    },
+    {
+        path: "/login/doc-gia",
+        component: () => import("@/views/Login/LoginDocGia.vue"),
+    },
+    {
+        path: "/login/nhan-vien",
+        component: () => import("@/views/Login/LoginNhanVien.vue"),
     },
     {
         path: '/sach/:maSach',
@@ -40,6 +71,7 @@ const routes = [
         meta: { requiresAuth: true, roles: [USER_ROLES.NHANVIEN, USER_ROLES.QUANLY] },
         children: [
             { path: "", name: "Dashboard", component: () => import("@/views/admin/Dashboard.vue") },
+            { path: "profile", name: "AdminProfile", component: () => import("@/views/admin/profileNhanVien.vue") },
             { path: "nxb", name: "QLNXB", component: () => import("@/views/admin/QLNXB.vue") },
             { path: "sach", name: "QLSach", component: () => import("@/views/admin/QLSach.vue") },
             { path: "phieu-muon", name: "QLPhieuMuon", component: () => import("@/views/admin/QLPhieuMuon.vue") },

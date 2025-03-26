@@ -5,6 +5,7 @@ import { IUploadRequest } from "../../../shared/interface";
 import multer from 'multer';
 import fs from "fs";
 import path from "path";
+import { DEFAULT_COVER_URL } from "../config/constants";
 
 dotenv.config();
 
@@ -48,7 +49,6 @@ const uploadBookCover = async (req: Request, res: Response, next: NextFunction) 
     const uploadReq = req as IUploadRequest;
     
     try {
-
         if (uploadReq.file) {
             const filePath = uploadReq.file.path;
             const folderName = "book-cover";
@@ -66,20 +66,40 @@ const uploadBookCover = async (req: Request, res: Response, next: NextFunction) 
     }
 };
 
-const extractPublicId = (link: string) => {
-    const dottedParts = link.split('/').pop()!.split('.');
-    dottedParts.pop();
-    return dottedParts.join('.');
-};
+// const extractPublicId = (link: string) => {
+//     const dottedParts = link.split('/').pop()!.split('.');
+//     dottedParts.pop();
+//     return dottedParts.join('.');
+// };
+
+const extractPublicID = (url:string) => {
+    const urlParts = url.split('/');
+    const lastPart = urlParts.pop(); 
+
+    const lastDotIndex = lastPart?.lastIndexOf('.');
+    if (lastDotIndex === -1) return null; // Ensure a valid format
+
+    const publicID = lastPart?.substring(0, lastDotIndex); 
+
+
+    return urlParts.slice(7).join('/') + '/' + publicID
+
+
+}
 
 const deleteImage = async (link: string = "") => {
-    if (link != "") {
-        const { result } = await cloudinary.uploader.destroy(extractPublicId(link));
+    if (link != "" && link != DEFAULT_COVER_URL) {
+        const publicID = extractPublicID(link);
+        if (publicID === null) {
+            console.error("Error: Lỗi không tìm được publicID");
+            return;
+        } 
+        const { result } = await cloudinary.uploader.destroy(publicID);
         if (result !== "ok") {
             console.error("Error: Lỗi khi xoá ảnh");
         }
     } else {
-        console.error("không có link khi xoá ảnh");
+        console.error("không có link khi xoá ảnh hoặc link xoá là link mặc định");
     }
     
 }

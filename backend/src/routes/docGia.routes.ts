@@ -4,7 +4,7 @@ import {
     loginDocGia,
     logoutDocGia,
     getAllDocGia,
-    getDocGiaById,
+    getDocGia,
     updateDocGia,
     deleteDocGia,
     changePasswordDocGia,
@@ -19,8 +19,8 @@ router.post("/register", registerDocGia);
 router.post("/login", loginDocGia);
 router.post("/logout", logoutDocGia);
 
-router.get("/:id", authorize(), getDocGiaById);
-router.get("/", authorize(USER_GROUPS.QUANLY), getAllDocGia);
+router.get("/get-one", authorize(), getDocGia);
+router.get("/", authorize(USER_GROUPS.NV_QL), getAllDocGia);
 router.put("/:id", authorize(USER_GROUPS.DG_QL), updateDocGia);
 router.patch("/:id/change-password", authorize(), changePasswordDocGia);
 router.patch("/:id/reset-password", authorize(USER_GROUPS.QUANLY), resetPasswordDocGia);

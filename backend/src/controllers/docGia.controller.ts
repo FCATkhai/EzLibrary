@@ -104,7 +104,7 @@ export const logoutDocGia = (req: Request, res: Response, next: NextFunction) =>
 /**
  *  Lấy danh sách độc giả (Chỉ Quản lý mới có quyền)
  *  @route GET /api/doc-gia
- *  @access Private (Quản lý)
+ *  @access NV_QL
  */
 export const getAllDocGia = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -143,21 +143,30 @@ export const getAllDocGia = async (req: Request, res: Response, next: NextFuncti
 };
 
 /**
- *  Lấy thông tin chi tiết độc giả (Chỉ Quản lý hoặc chính độc giả)
- *  @route GET /api/doc-gia/:id
+ *  Lấy thông tin chi tiết độc giả theo mã hoặc số điện thoại
+ *  @route GET /api/doc-gia/get-one?maDG=...&sdt=...
  *  @access Private
  */
-export const getDocGiaById = async (req: Request, res: Response, next: NextFunction) => {
+export const getDocGia = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
-        const docGia = await DocGia.findOne({ maDG: id }).select("-password");
-
-        if (!docGia) {
-            res.status(404);
-            throw new Error("Không tìm thấy độc giả");
+        const { maDG, sdt } = req.query;
+        if (maDG) {
+            const docGia = await DocGia.findOne({ maDG: maDG }).select("-password");
+            if (!docGia) {
+                res.status(404);
+                throw new Error("Không tìm thấy độc giả qua maDG");
+            }
+            res.json(docGia);
         }
-
-        res.json(docGia);
+    
+        if (sdt) {
+            const docGia = await DocGia.findOne({ soDienThoai: sdt }).select("-password");
+            if (!docGia) {
+                res.status(404);
+                throw new Error("Không tìm thấy độc giả qua số điện thoại");
+            }
+            res.json(docGia);
+        }
     } catch (error) {
         next(error);
     }

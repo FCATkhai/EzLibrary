@@ -4,7 +4,6 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-gray-800 text-white p-4">
             <h2 class="text-xl font-bold">Quản lý</h2>
-            <p>todo: Thêm yup với vee-validate</p>
             <nav>
                 <RouterLink to="/admin" class="block py-2">📊 Dashboard</RouterLink>
                 <RouterLink to="/admin/nxb" class="block py-2">📚 Quản lý NXB</RouterLink>

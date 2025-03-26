@@ -44,6 +44,21 @@ export interface ISach extends Document {
     coverUrl: string;
 }
 
+// theo doi muon sach
+interface IDocGiaDetails {
+    hoLot: string;
+    ten: string;
+    soDienThoai: string;
+}
+
+interface INhanVienDetails {
+    hoTenNV: string;
+}
+
+interface ISachDetails {
+    tenSach: string;
+    coverUrl: string;
+}
 
 export interface ITheoDoiMuonSach extends Document {
     maPM: string;
@@ -53,8 +68,14 @@ export interface ITheoDoiMuonSach extends Document {
     ngayMuon: Date;
     ngayHenTra?: Date;
     ngayTra?: Date;
-    trangThai: string;
+    trangThai: "pending" | "borrowing" | "returned" | "rejected";
+    docGia?: IDocGiaDetails;
+    nhanVien?: INhanVienDetails;
+    sach?: ISachDetails;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
+// ---------------------
 
 
 export interface IUploadRequest extends Request {

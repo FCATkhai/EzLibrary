@@ -22,6 +22,7 @@ export function useSachAdmin() {
     let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const fetchBooks = async (reset = false) => {
+        console.log("fetchBooks called");
         if (loading.value) return;
 
         if (reset) {
@@ -36,7 +37,7 @@ export function useSachAdmin() {
                 limit: limit.value,
                 search: searchTerm.value,
             });
-            // console.log("response: ", response);
+            console.log("response fetchBooks: ", response);
             books.value = response.data; // Replace for pagination
             totalPages.value = response.totalPages;
             hasMore.value = page.value < totalPages.value;

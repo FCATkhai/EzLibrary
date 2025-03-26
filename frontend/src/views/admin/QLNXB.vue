@@ -68,15 +68,15 @@ const handleSubmit = async () => {
     if (diaChi.value) data.diaChi = diaChi.value;
     try {
         if (modalStatus.value == "adding") {
-        await addNXB(data);
-        toast.success("Thêm NXB thành công");
-    } else if (modalStatus.value == "editing" && editingId.value) {
-        await editNXB(editingId.value, data);
-        toast.success("Chỉnh sửa NXB thành công");
-    }
+            await addNXB(data);
+            toast.success("Thêm NXB thành công");
+        } else if (modalStatus.value == "editing" && editingId.value) {
+            await editNXB(editingId.value, data);
+            toast.success("Chỉnh sửa NXB thành công");
+        }
 
-    resetForm();
-    closeModalBtn.value?.click();
+        resetForm();
+        closeModalBtn.value?.click();
     } catch (error: any) {
         errorMessage.value = error.response?.data?.message || "Lỗi khi xử lý NXB";
     }
@@ -130,7 +130,11 @@ onMounted(() => {
     <div class="p-4">
         <h1 class="text-xl font-bold mb-4">Quản lý Nhà Xuất Bản</h1>
         <button class="my-4 btn btn-success block" @click="showModal('adding')" :disabled="loading">Thêm NXB</button>
-        <input v-model="searchTerm" placeholder="Tìm kiếm NXB..." class="input input-bordered mb-4" />
+        <div class="flex gap-4 mb-4">
+            <button @click="fetchNXBs(true)" class=" btn btn-outline" :disabled="loading"><i
+                    class="fa-solid fa-rotate"></i>Làm mới</button>
+            <input v-model="searchTerm" placeholder="Tìm kiếm NXB..." class="input input-bordered mb-4" />
+        </div>
         <template v-if="loading">
             <p>Đang tải</p>
         </template>
@@ -208,7 +212,8 @@ onMounted(() => {
                     </div>
                     <button class="btn btn-error" @click="handleDelete" :disabled="loading">Xóa</button>
                     <form method="dialog">
-                        <button ref="closeDeleteModalBtn" class="btn" @click="editingId = null" :disabled="loading">Hủy</button>
+                        <button ref="closeDeleteModalBtn" class="btn" @click="editingId = null"
+                            :disabled="loading">Hủy</button>
                     </form>
                 </div>
             </fieldset>

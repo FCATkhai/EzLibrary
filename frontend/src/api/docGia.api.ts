@@ -34,12 +34,12 @@ export const getAllDocGia = async (params: { page?: number; limit?: number; sear
 };
 
 /**
- * Lấy thông tin độc giả theo mã (Chỉ Quản lý hoặc chính độc giả)
- * @param maDG Mã độc giả
+ * Lấy thông tin độc giả theo mã hoặc số điện thoại
+ * {Object} params - { id?: string, sdt?: string }
  * @returns Thông tin độc giả
  */
-export const getDocGiaById = async (maDG: string) => {
-    const response = await axios.get<IDocGia>(`${API_URL}/${maDG}`);
+export const getDocGia = async (params: { maDG?: string; sdt?: string }) => {
+    const response = await axios.get<IDocGia>(`${API_URL}/get-one`, { params });
     return response.data;
 };
 

@@ -214,7 +214,7 @@ export const changePasswordNhanVien = async (req: Request, res: Response, next: 
         }
 
         // Chỉ cho phép nhân viên đổi mật khẩu chính mình hoặc người dùng là quản lý
-        if (req.user?.maNguoiDung !== id || req.user?.role !== USER_ROLES.QUANLY) {
+        if (req.user?.maNguoiDung !== id && req.user?.role !== USER_ROLES.QUANLY) {
             res.status(403);
             throw new Error("Bạn không có quyền thay đổi mật khẩu cho người khác");
         }

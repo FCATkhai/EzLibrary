@@ -3,6 +3,11 @@ import { ref, onMounted, useTemplateRef, computed } from "vue";
 import { useDocGia } from "@/composables/useDocGia";
 import { useToast } from "vue-toastification";
 import type { IDocGia } from "~/shared/interface";
+import { useAuthStore } from "@/stores/auth.store";
+import { USER_ROLES } from "~/shared/userRoles";
+
+const authStore = useAuthStore();
+const isManager = computed(() => authStore.user?.role === USER_ROLES.QUANLY);
 
 const {
     docGias,
@@ -11,7 +16,7 @@ const {
     loading,
     searchTerm,
     fetchDocGias,
-    fetchDocGiaById,
+    fetchDocGia,
     addDocGia,
     editDocGia,
     removeDocGia,
@@ -183,7 +188,10 @@ onMounted(() => {
     <div class="p-4">
         <h1 class="text-xl font-bold mb-4">Quản lý Độc Giả</h1>
         <button @click="showModal('adding')" class="my-4 btn btn-success block" :disabled="loading">Thêm Độc Giả</button>
-        <input v-model="searchTerm" placeholder="Tìm kiếm theo tên độc giả hoặc sđt..." class="input input-bordered mb-4" />
+        <div class="flex gap-4 mb-4">
+            <button @click="fetchDocGias(true)" class=" btn btn-outline" :disabled="loading"><i class="fa-solid fa-rotate"></i>Làm mới</button>
+            <input v-model="searchTerm" placeholder="Tìm kiếm theo tên độc giả hoặc sđt..." class="input input-bordered mb-4" />
+        </div>
         <template v-if="loading">
             <p>Đang tải</p>
         </template>
@@ -203,7 +211,7 @@ onMounted(() => {
                     <td>{{ docGia.soDienThoai }}</td>
                     <td>
                         <button @click="showInfoModal(docGia)" class="btn btn-info mr-2">Xem chi tiết</button>
-                        <button @click="showModal('editing', docGia.maDG)" class="btn btn-warning btn-sm mr-2">Sửa</button>
+                        <button v-if="isManager" @click="showModal('editing', docGia.maDG)" class="btn btn-warning btn-sm mr-2">Sửa</button>
                         <button @click="showResetModal(docGia.maDG)" class="btn btn-neutral btn-sm mr-2" :disabled="loading">Reset mật khẩu</button>
                         <button @click="showDeleteModal(docGia.maDG)" class="btn btn-error btn-sm" :disabled="loading">Xóa</button>
                     </td>
@@ -231,7 +239,7 @@ onMounted(() => {
                     <label class="fieldset-label text-lg">Tên<span class="text-error">*</span></label>
                     <input class="input w-full" v-model="ten" type="text" required />
                     <label class="fieldset-label text-lg">Số Điện Thoại<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="soDienThoai" type="text" required />
+                    <input class="input w-full" v-model="soDienThoai" type="text" minlength="10" maxlength="10" required />
                     <label v-if="modalStatus == 'adding'" class="fieldset-label text-lg">Mật Khẩu<span class="text-error">*</span></label>
                     <input v-if="modalStatus == 'adding'" class="input w-full" v-model="password" :type="modalStatus === 'adding' ? 'password' : 'text'" :required="modalStatus === 'adding'" />
                     <label class="fieldset-label text-lg">Ngày Sinh</label>
@@ -339,7 +347,7 @@ onMounted(() => {
                         <tr>
                             <th>Địa Chỉ</th>
                             <td>
-                                <textarea class="w-full" rows="5" readonly>{{ docGiaRef.diaChi || "Không có" }}</textarea>
+                                <textarea class="textarea w-full" rows="3" readonly>{{ docGiaRef.diaChi || "Không có" }}</textarea>
                             </td>
                         </tr>
                     </tbody>

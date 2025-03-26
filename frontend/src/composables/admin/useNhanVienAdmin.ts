@@ -1,18 +1,20 @@
 import { ref, watch } from "vue";
 import {
-    getAllDocGia,
-    getDocGia,
-    createDocGia,
-    updateDocGia,
-    deleteDocGia,
-    changePasswordDocGia,
-    resetPasswordDocGia,
-} from "@/api/docGia.api";
-import type { IDocGia } from "~/shared/interface";
+    getAllNhanVien,
+    getNhanVienById,
+    createNhanVien,
+    updateNhanVien,
+    deleteNhanVien,
+    changePasswordNhanVien,
+    resetPasswordNhanVien,
+} from "@/api/nhanVien.api";
+import type { INhanVien } from "~/shared/interface";
 
-export function useDocGia() {
-    const docGias = ref<IDocGia[]>([]);
-    const docGia = ref<IDocGia | null>(null);
+
+
+export function useNhanVienAdmin() {
+    const nhanViens = ref<INhanVien[]>([]);
+    const nhanVien = ref<INhanVien | null>(null);
     const page = ref(1);
     const limit = ref(10);
     const totalPages = ref(1);
@@ -22,7 +24,7 @@ export function useDocGia() {
 
     let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    const fetchDocGias = async (reset = false) => {
+    const fetchNhanViens = async (reset = false) => {
         if (loading.value) return;
 
         if (reset) {
@@ -32,95 +34,93 @@ export function useDocGia() {
 
         loading.value = true;
         try {
-            const response = await getAllDocGia({
+            const response = await getAllNhanVien({
                 page: page.value,
                 limit: limit.value,
                 search: searchTerm.value,
             });
-            docGias.value = response.data;
+            nhanViens.value = response.data;
             totalPages.value = response.totalPages;
-            hasMore.value = page.value < totalPages.value;
+            hasMore.value = response.hasMore;
 
-            if (docGias.value.length === 0 && page.value > 1) {
+            if (nhanViens.value.length === 0 && page.value > 1) {
                 page.value--;
-                await fetchDocGias();
+                await fetchNhanViens();
             }
         } catch (error) {
-            console.error("Lỗi tải danh sách độc giả:", error);
+            console.error("Lỗi tải danh sách nhân viên:", error);
         } finally {
             loading.value = false;
         }
     };
 
-    const fetchDocGia = async (query: {maDG?: string, sdt?: string}) => {
+    const fetchNhanVienById = async (maNV: string) => {
         loading.value = true;
         try {
-            const res = await getDocGia(query);
-            docGia.value = res;
+            const res = await getNhanVienById(maNV);
+            nhanVien.value = res;
             return res;
         } catch (error) {
-            console.error("Lỗi khi tải độc giả:", error);
+            console.error("Lỗi khi tải nhân viên:", error);
             throw error;
         } finally {
             loading.value = false;
         }
     };
 
-    const addDocGia = async (data: {
-        hoLot: string;
-        ten: string;
+    const addNhanVien = async (data: {
+        hoTenNV: string;
+        password: string;
+        chucVu: string;
+        diaChi: string;
         soDienThoai: string;
-        password?: string;
-        ngaySinh?: string;
-        phai?: string;
-        diaChi?: string;
     }) => {
         loading.value = true;
         try {
-            const result = await createDocGia(data);
-            return result.docGia;
+            const result = await createNhanVien(data);
+            return result.NhanVien; // API returns { message, NhanVien }
         } catch (error) {
-            console.error("Lỗi khi tạo độc giả:", error);
+            console.error("Lỗi khi tạo nhân viên:", error);
             throw error;
         } finally {
             loading.value = false;
-            await fetchDocGias(true);
+            await fetchNhanViens(true);
         }
     };
 
-    const editDocGia = async (maDG: string, data: Partial<IDocGia>) => {
+    const editNhanVien = async (maNV: string, data: Partial<INhanVien>) => {
         loading.value = true;
         try {
-            const result = await updateDocGia(maDG, data);
-            return result.docGia;
+            const result = await updateNhanVien(maNV, data);
+            return result.nhanVien; // API returns { message, nhanVien }
         } catch (error) {
-            console.error("Lỗi khi cập nhật độc giả:", error);
+            console.error("Lỗi khi cập nhật nhân viên:", error);
             throw error;
         } finally {
             loading.value = false;
-            await fetchDocGias();
+            await fetchNhanViens(); // Refresh current page
         }
     };
 
-    const removeDocGia = async (maDG: string) => {
+    const removeNhanVien = async (maNV: string) => {
         loading.value = true;
         try {
-            await deleteDocGia(maDG);
+            await deleteNhanVien(maNV);
         } catch (error) {
-            console.error("Lỗi khi xóa độc giả:", error);
+            console.error("Lỗi khi xóa nhân viên:", error);
             throw error;
         } finally {
             loading.value = false;
-            await fetchDocGias();
+            await fetchNhanViens(); // Refresh current page
         }
     };
 
-    const changePassword = async (maDG: string, oldPassword: string, newPassword: string) => {
+    const changePassword = async (maNV: string, oldPassword: string, newPassword: string) => {
         loading.value = true;
         try {
-            const result = await changePasswordDocGia(maDG, {
+            const result = await changePasswordNhanVien(maNV, {
                 oldPassword,
-                newPassword
+                newPassword,
             });
             return result.message;
         } catch (error) {
@@ -131,11 +131,11 @@ export function useDocGia() {
         }
     };
 
-    const resetPassword = async (maDG: string, newPassword: string) => {
+    const resetPassword = async (maNV: string, newPassword: string) => {
         loading.value = true;
         try {
-            const result = await resetPasswordDocGia(maDG, {
-                newPassword
+            const result = await resetPasswordNhanVien(maNV, {
+                newPassword,
             });
             return result.message;
         } catch (error) {
@@ -149,24 +149,24 @@ export function useDocGia() {
     watch(searchTerm, () => {
         if (searchTimeout) clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            fetchDocGias(true);
+            fetchNhanViens(true);
         }, 500);
     });
 
     return {
-        docGias,
-        docGia,
+        nhanViens,
+        nhanVien,
         page,
         limit,
         totalPages,
         hasMore,
         loading,
         searchTerm,
-        fetchDocGias,
-        fetchDocGia,
-        addDocGia,
-        editDocGia,
-        removeDocGia,
+        fetchNhanViens,
+        fetchNhanVienById,
+        addNhanVien,
+        editNhanVien,
+        removeNhanVien,
         changePassword,
         resetPassword,
     };

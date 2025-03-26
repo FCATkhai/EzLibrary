@@ -26,8 +26,16 @@ export const createNhanVien = async (data: {
  * Lấy danh sách tất cả nhân viên (Chỉ Quản lý)
  * @returns Danh sách nhân viên
  */
-export const getAllNhanVien = async () => {
-    const response = await axios.get<INhanVien[]>(API_URL);
+interface NhanVienResponse {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasMore: boolean;
+    data: INhanVien[];
+}
+export const getAllNhanVien = async (params: { page?: number; limit?: number; search?: string }) => {
+    const response = await axios.get<NhanVienResponse>(API_URL, {params});
     return response.data;
 };
 
@@ -48,7 +56,7 @@ export const getNhanVienById = async (maNV: string) => {
  * @returns Nhân viên sau khi cập nhật
  */
 export const updateNhanVien = async (maNV: string, data: Partial<INhanVien>) => {
-    const response = await axios.put<INhanVien>(`${API_URL}/${maNV}`, data);
+    const response = await axios.put<{message: string, nhanVien: INhanVien}>(`${API_URL}/${maNV}`, data);
     return response.data;
 };
 
@@ -59,7 +67,7 @@ export const updateNhanVien = async (maNV: string, data: Partial<INhanVien>) => 
  * @returns message thông báo
  */
 export const changePasswordNhanVien = async (maNV: string, data: { oldPassword: string, newPassword: string }) => {
-    const response = await axios.put<{ message: string }>(`${API_URL}/${maNV}/change-password`, data);
+    const response = await axios.patch<{ message: string }>(`${API_URL}/${maNV}/change-password`, data);
     return response.data;
 };
 
@@ -70,7 +78,7 @@ export const changePasswordNhanVien = async (maNV: string, data: { oldPassword: 
  * @returns message thông báo
  */
 export const resetPasswordNhanVien = async (maNV: string, data: { newPassword: string }) => {
-    const response = await axios.put<{ message: string }>(`${API_URL}/${maNV}/reset-password`, data);
+    const response = await axios.patch<{ message: string }>(`${API_URL}/${maNV}/reset-password`, data);
     return response.data;
 };
 

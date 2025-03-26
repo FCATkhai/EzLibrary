@@ -18,19 +18,18 @@ export const useAuthStore = defineStore("auth", {
         async login(soDienThoai: string, password: string, role: UserRole) {
             try {
                 if (role == USER_ROLES.DOCGIA) {
-
-                    const data: IDocGia = await loginDG(soDienThoai, password);
-                    console.log(data);
+                    const res = await loginDG(soDienThoai, password);
+                    const docGia: IDocGia = res.docGia;
                     this.user = {
-                        maNguoiDung: data.maDG,
-                        hoTen: data.hoLot + " " + data.ten,
+                        maNguoiDung: docGia.maDG,
+                        hoTen: docGia.hoLot + " " + docGia.ten,
                         role
                     };
                     this.isAuthenticated = true;
                 }
                 if (role == USER_ROLES.NHANVIEN) {
-                    const data = await loginNV(soDienThoai, password);
-                    const nhanVien: INhanVien = data.nhanVien;
+                    const res = await loginNV(soDienThoai, password);
+                    const nhanVien: INhanVien = res.nhanVien;
                     this.user = {
                         maNguoiDung: nhanVien.maNV,
                         hoTen: nhanVien.hoTenNV,
@@ -60,50 +59,3 @@ export const useAuthStore = defineStore("auth", {
     },
     persist: true
 });
-
-
-// export const useAuthStore = defineStore("auth", () => {
-//     const user = ref<IUser | null>(null);
-//     const isAuthenticated = ref(false);
-
-//     async function login(soDienThoai: string, password: string, role: UserRole) {
-//         try {
-//             if (role == USER_ROLES.DOCGIA) {
-
-//                 const data: IDocGia = await loginDG(soDienThoai, password);
-//                 user.value = {
-//                     maNguoiDung: data.maDG,
-//                     hoTen: data.hoLot + " " + data.ten,
-//                     role
-//                 };
-//                 isAuthenticated.value = true;
-//             }
-//             if (role == USER_ROLES.NHANVIEN) {
-//                 const data: INhanVien = await loginNV(soDienThoai, password);
-//                 user.value = {
-//                     maNguoiDung: data.maNV,
-//                     hoTen: data.hoTenNV,
-//                     role: data.chucVu as UserRole
-//                 };
-//                 isAuthenticated.value = true;
-//             }
-
-//         } catch (error) {
-//             throw new Error(`Đăng nhập thất bại, Error: ${error}`);
-//         }
-//     }
-//     async function logout() {
-//         try {
-//             if (user.value?.role === USER_ROLES.DOCGIA) {
-//                 await logoutDG();
-//             } else {
-//                 await logoutNV();
-//             }
-//             user.value = null;
-//             isAuthenticated.value = false;
-//         } catch (error) {
-//             throw new Error(`Đăng xuất thất bại, Error: ${error}`);
-//         }
-//     }
-// },
-// );

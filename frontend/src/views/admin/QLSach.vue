@@ -186,7 +186,10 @@ onMounted(() => {
     <div class="p-4">
         <h1 class="text-xl font-bold mb-4">Quản lý Sách</h1>
         <button @click="showModal('adding')" class="my-4 btn btn-success block" :disabled="loading">Thêm Sách</button>
-        <input v-model="searchTerm" placeholder="Tìm kiếm theo tên hoặc tác giả..." class="input input-bordered mb-4" />
+        <div class="flex gap-4 mb-4">
+            <button @click="fetchBooks(true)" class=" btn btn-outline" :disabled="loading"><i class="fa-solid fa-rotate"></i>Làm mới</button>
+            <input v-model="searchTerm" placeholder="Tìm kiếm theo tên hoặc tác giả..." class="input input-bordered mb-4" />
+        </div>
         <template v-if="loading">
             <p>Đang tải</p>
         </template>
@@ -203,7 +206,6 @@ onMounted(() => {
             <tbody>
                 <tr v-for="sach in books" :key="sach.maSach">
                     <td>{{ sach.maSach }}</td>
-                    <!-- <td>{{ sach.tenSach }}</td> -->
                     <td class="w-2/5">
                         <div class="flex items-center gap-3">
                             <div class="avatar">
@@ -250,9 +252,8 @@ onMounted(() => {
                         <div class="flex flex-col justify-center">
                             <input v-model="searchTermNXB" placeholder="Tìm kiếm NXB"
                                 class="input input-bordered mt-4 block mx-auto" />
-                            <p>{{ searchTermNXB }}</p>
                             <div class="flex">
-                                <button @click="prevPageNXB" :disabled="pageNXB === 1" class="my-auto btn">«</button>
+                                <button @click="prevPageNXB" :disabled="pageNXB === 1" class="my-auto btn" type="button">«</button>
                                 <table class="table w-5/6 mt-4 mx-auto border">
                                     <thead>
                                         <tr class="bg-gray-200">
@@ -261,7 +262,7 @@ onMounted(() => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="nxb in nhaXuatBans" :key="nxb.maNXB">
+                                        <tr v-for="nxb in nhaXuatBans" :key="nxb.maNXB" :class="{ 'bg-gray-300': maNXB=== nxb.maNXB}">
                                             <td>{{ nxb.tenNXB }}</td>
                                             <td>
                                                 <button @click="maNXB = nxb.maNXB; tenNXB = nxb.tenNXB"
@@ -271,7 +272,7 @@ onMounted(() => {
                                     </tbody>
                                 </table>
                                 <button @click="nextPageNXB" :disabled="pageNXB === totalPagesNXB"
-                                    class="my-auto btn">»</button>
+                                    class="my-auto btn" type="button">»</button>
 
                             </div>
 
@@ -375,10 +376,10 @@ onMounted(() => {
                                 sachRef.maNXB.tenNXB
                                 }}</td>
                         </tr>
-                        <tr class="h-30">
+                        <tr >
                             <th>Mô tả</th>
                             <td>
-                                <textarea class="w-full" rows="7" readonly>
+                                <textarea class="textarea w-full" rows="7" readonly>
                                 {{ sachRef.moTa }}
                             </textarea>
                             </td>

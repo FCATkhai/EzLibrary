@@ -52,7 +52,7 @@ const muonSach = async () => {
     message.value = "";
 
     try {
-        await createPhieuMuon_DG(sach.value!.maSach);
+        await createPhieuMuon_DG({maSach: sach.value!.maSach});
         message.value = "Mượn sách thành công! Vui lòng chờ xác nhận.";
     } catch (err) {
         error.value = "Không thể mượn sách. Vui lòng thử lại.";
