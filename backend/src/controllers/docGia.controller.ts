@@ -4,6 +4,8 @@ import DocGia from "../models/DocGia.model";
 import { USER_ROLES } from "../config/constants";
 import generateId from "../utils/generateId.util";
 import { FilterQuery } from "mongoose";
+import TheoDoiMuonSach from "../models/TheoDoiMuonSach.model";
+import { ITheoDoiMuonSach } from "~/shared/interface";
 /**
  *  Đăng ký độc giả mới
  *  @route POST /api/doc-gia/register
@@ -299,13 +301,23 @@ export const resetPasswordDocGia = async (req: Request, res: Response, next: Nex
 export const deleteDocGia = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const docGia = await DocGia.findOneAndDelete({ maDG: id });
+        const docGia = await DocGia.findOne({ maDG: id });
 
         if (!docGia) {
             res.status(404);
             throw new Error("Không tìm thấy độc giả");
         }
 
+        // Xoá phiếu mượn của độc giả này
+        const phieMuons = await TheoDoiMuonSach.find({ maDG: req.params.id});
+        if (phieMuons.some((phieMuon: ITheoDoiMuonSach) => phieMuon.trangThai === "borrowing")) {
+            res.status(400);
+            throw new Error("Không thể xóa độc giả này vì độc giả đang được mượn");
+        } else {
+            await TheoDoiMuonSach.deleteMany({ maDG: req.params.id });
+        }
+
+        await docGia.deleteOne();
         res.json({ message: "Xóa độc giả thành công" });
     } catch (error) {
         next(error);

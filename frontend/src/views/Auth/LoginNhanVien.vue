@@ -5,14 +5,18 @@
 
             <div class="mb-4">
                 <label class="block">Số điện thoại:</label>
-                <input v-model="soDienThoai" type="tel" pattern="[0-9]*" oninvalid="this.setCustomValidity('Vui lòng chỉ nhập số (0-9)');"
-                oninput="this.setCustomValidity('');" class="w-full p-2 border rounded" minlength=10 maxlength=10
-                    size=10 />
+                <input v-model="soDienThoai" type="tel" class="input validator tabular-nums w-full p-2 "
+                    pattern="[0-9]*" minlength="10" maxlength="10" title="Số điện thoại phải là 10 con số"
+                    placeholder="Nhập số điện thoại" />
+                    <p class="validator-hint">Số điện thoại phải là 10 con số</p>
             </div>
 
             <div class="mb-4">
                 <label class="block">Mật khẩu:</label>
-                <input v-model="password" type="password" class="w-full p-2 border rounded" />
+                <input v-model="password" type="password" class="input validator w-full p-2"
+                    pattern="^[A-Za-z0-9]{5,}$" title="Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt"
+                    placeholder="Nhập mật khẩu" />
+                <p class="validator-hint">Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt</p>
             </div>
 
             <p v-if="errorMsg" class="text-red-500 text-center">{{ errorMsg }}</p>
@@ -20,7 +24,12 @@
             <button @click="handleLogin" class="w-full mt-4 bg-green-500 text-white p-2 rounded hover:bg-green-600">
                 Đăng nhập
             </button>
+            <p class="text-center mt-3">
+                Quay về trang chủ
+                <RouterLink to="/" class="text-blue-500 underline">Trang chủ</RouterLink>
+            </p>
         </div>
+
     </div>
 </template>
 

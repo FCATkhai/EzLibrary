@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <h1 class="text-2xl font-bold">📊 Dashboard</h1>
+    <div class="p-4">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
         <p>Chào mừng {{ authStore.user?.hoTen }} đến trang quản lý.</p>
 
         <template v-if="loading">

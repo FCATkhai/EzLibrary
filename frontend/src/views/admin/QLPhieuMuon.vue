@@ -200,7 +200,8 @@ onMounted(() => {
         <h1 class="text-xl font-bold mb-4">Quản lý Phiếu Mượn</h1>
         <button @click="showModal" class="my-4 btn btn-success block" :disabled="loading">Tạo phiếu mượn</button>
         <div class="flex gap-4 mb-4">
-            <button @click="fetchPhieuMuons(true)" class=" btn btn-outline" :disabled="loading"><i class="fa-solid fa-rotate"></i>Làm mới</button>
+            <button @click="fetchPhieuMuons(true)" class=" btn btn-outline" :disabled="loading"><i
+                    class="fa-solid fa-rotate"></i>Làm mới</button>
             <input v-model="searchTerm" placeholder="Tìm kiếm theo tên độc giả, tên nhân viên, tên sách..."
                 class="input input-bordered w-1/2" />
             <select v-model="trangThai" class="select select-bordered">
@@ -281,15 +282,20 @@ onMounted(() => {
                 <legend class="fieldset-legend text-xl font-bold">Tạo phiếu mượn</legend>
                 <form @submit.prevent="handleSubmit">
                     <div v-if="formStep == 1" class="flex flex-col justify-center">
-                        <h1 class="text-base font-bold">Nhập số điện thoại của độc giả</h1>
-                        <input v-model="soDienThoaiDG" placeholder="Nhập số điện thoại"
-                            class="input input-bordered mt-4 block mx-auto" minlength="10" maxlength="10" size="10" />
+                        <div class="w-1/2 mx-auto">
+                            <h1 class="text-base font-bold mb-3">Nhập số điện thoại của độc giả</h1>
+                            <input v-model="soDienThoaiDG" type="tel" class="input validator tabular-nums w-2/3 p-2 "
+                                pattern="[0-9]*" minlength="10" maxlength="10" title="Số điện thoại phải là 10 con số"
+                                placeholder="Nhập số điện thoại" />
+                            <p class="validator-hint">Số điện thoại phải là 10 con số</p>
 
-                        <button @click="timDocGia" class="btn btn-primary mt-4 mx-20" :disabled="loadingDG"
-                            type="button">Tìm kiếm</button>
+                            <button @click="timDocGia" class="btn btn-primary mt-4" :disabled="loadingDG"
+                                type="button">Tìm kiếm</button>
 
-                        <p class="mt-4 text-base">Độc giả tìm được: {{ docGia ? `${docGia?.hoLot} ${docGia?.ten}` : "" }}
-                        </p>
+                            <p class="mt-4 text-base">Độc giả tìm được: {{ docGia ? `${docGia?.hoLot} ${docGia?.ten}` : ""
+                                }}
+                            </p>
+                        </div>
                     </div>
                     <div v-if="formStep == 2">
                         <h1 class="text-base font-bold">Chọn sách cần mượn</h1>

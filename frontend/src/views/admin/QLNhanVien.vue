@@ -225,12 +225,17 @@ onMounted(() => {
                     <label class="fieldset-label text-lg">Họ Tên<span class="text-error">*</span></label>
                     <input class="input w-full" v-model="hoTenNV" type="text" required />
                     <label class="fieldset-label text-lg">Số Điện Thoại<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="soDienThoai" type="text" minlength="10" maxlength="10"
-                        required />
+                    <input v-model="soDienThoai" type="tel" class="input validator tabular-nums w-full p-2 "
+                        pattern="[0-9]*" minlength="10" maxlength="10" title="Số điện thoại phải là 10 con số"
+                        placeholder="Nhập số điện thoại" />
+                    <p class="validator-hint">Số điện thoại phải là 10 con số</p>
                     <label v-if="modalStatus === 'adding'" class="fieldset-label text-lg">Mật Khẩu<span
                             class="text-error">*</span></label>
-                    <input v-if="modalStatus === 'adding'" class="input w-full" v-model="password" type="password"
-                        required />
+                            <input v-if="modalStatus == 'adding'" class="input validator w-full" v-model="password"
+                        type="password" required pattern="^[A-Za-z0-9]{5,}$"
+                        title="Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt"
+                        placeholder="Nhập mật khẩu" />
+                    <p class="validator-hint">Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt</p>
                     <label class="fieldset-label text-lg">Chức Vụ<span class="text-error">*</span></label>
                     <select class="select w-full" v-model="chucVu" required>
                         <option disabled selected>Chọn chức vụ</option>
@@ -263,8 +268,11 @@ onMounted(() => {
                 <legend class="fieldset-legend text-xl font-bold">Reset Mật Khẩu</legend>
                 <form @submit.prevent="handleResetPassword">
                     <label class="fieldset-label text-lg">Mật Khẩu Mới<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="newPassword" type="password" required
+                    <input class="input validator w-full" v-model="newPassword" type="password" required
+                        pattern="^[A-Za-z0-9]{5,}$"
+                        title="Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt"
                         placeholder="Nhập mật khẩu mới" />
+                    <p class="validator-hint">Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt</p>
 
                     <p class="text-error text-xl">{{ errorMessage }}</p>
                     <div class="modal-action">

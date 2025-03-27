@@ -2,22 +2,35 @@
     <Navbar />
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 text-white p-4">
-            <h2 class="text-xl font-bold">Quản lý</h2>
-            <nav>
-                <RouterLink to="/admin" class="block py-2">📊 Dashboard</RouterLink>
-                <RouterLink to="/admin/nxb" class="block py-2">📚 Quản lý NXB</RouterLink>
-                <RouterLink to="/admin/sach" class="block py-2">📚 Quản lý Sách</RouterLink>
-                <RouterLink to="/admin/phieu-muon" class="block py-2">📄 Quản lý Phiếu Mượn</RouterLink>
-                <RouterLink to="/admin/doc-gia" class="block py-2">👤 Quản lý Độc Giả</RouterLink>
-                <RouterLink v-if="isManager" to="/admin/nhan-vien" class="block py-2">👔 Quản lý Nhân Viên</RouterLink>
-            </nav>
-        </aside>
+        <div class="drawer lg:drawer-open">
+            <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+            <div class="drawer-content">
+                <!-- Page content here -->
+                <label for="my-drawer" class="btn btn--soft drawer-button lg:hidden">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </label>
+                <div class="flex flex-col items-center">
+                    <RouterView />
+                </div>
+            </div>
+            <div class="drawer-side">
+                <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+                <ul class="menu bg-base-200 text-base-content min-h-full w-60 p-4">
+                    <!-- Sidebar content here -->
+                    <h2 class="text-xl font-bold mb-2">Quản lý</h2>
 
-        <!-- Nội dung chính -->
-        <main class="flex-1 p-4">
-            <RouterView />
-        </main>
+                    <li><RouterLink to="/admin" class="block py-2"><i class="fa-solid fa-chart-simple"></i> Dashboard</RouterLink></li>
+                    <li><RouterLink to="/admin/nxb" class="block py-2"><i class="fa-solid fa-building-user"></i> Quản lý NXB</RouterLink></li>
+                    <li><RouterLink to="/admin/sach" class="block py-2"><i class="fa-solid fa-book"></i> Quản lý Sách</RouterLink></li>
+                    <li><RouterLink to="/admin/phieu-muon" class="block py-2"><i class="fa-solid fa-receipt"></i> Quản lý Phiếu Mượn</RouterLink></li>
+                    <li><RouterLink to="/admin/doc-gia" class="block py-2"><i class="fa-solid fa-users"></i> Quản lý Độc Giả</RouterLink></li>
+                    <li>
+                        <RouterLink v-if="isManager" to="/admin/nhan-vien" class="block py-2"><i class="fa-solid fa-user-tie"></i> Quản lý Nhân Viên
+                        </RouterLink>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </template>
 

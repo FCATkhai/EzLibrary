@@ -1,9 +1,9 @@
 <template>
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         <div v-for="sach in sachList" :key="sach.maSach"
-            class="card cursor-pointer p-2 rounded-lg shadow-lg hover:shadow-xl transition"
+            class="card cursor-pointer p-2 rounded-lg shadow-lg hover:shadow-xl transition "
             @click="goToDetail(sach.maSach)">
-            <img :src="sach.coverUrl" alt="Bìa sách" class="w-full object-cover rounded-md" />
+            <img :src="sach.coverUrl" alt="Bìa sách" class="w-fulll object-cover rounded-md" />
             <h3 class="mt-2 font-semibold text-center">{{ sach.tenSach }}</h3>
         </div>
     </div>

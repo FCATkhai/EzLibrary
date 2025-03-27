@@ -123,6 +123,9 @@ export const getAllPhieuMuon = async (req: Request, res: Response, next: NextFun
             },
             { $match: matchQuery },
             {
+                $sort: { createdAt: -1 } // Sort by createdAt, descending (newest first)
+            },
+            {
                 $facet: {
                     metadata: [
                         { $count: "total" },
@@ -157,6 +160,7 @@ export const getAllPhieuMuon = async (req: Request, res: Response, next: NextFun
             }
         ];
 
+        //@ts-ignore
         const [result] = await TheoDoiMuonSach.aggregate(pipeline).exec();
         // console.log("Aggregation Result:", result); // Debug full result
         const total = result.metadata[0]?.total || 0;
@@ -258,6 +262,9 @@ export const getPhieuMuonByMaDG = async (req: Request, res: Response, next: Next
                 $match: matchQuery
             },
             {
+                $sort: { createdAt: -1 } // Sort by createdAt, descending (newest first)
+            },
+            {
                 $facet: {
                     metadata: [
                         { $count: "total" },
@@ -291,6 +298,7 @@ export const getPhieuMuonByMaDG = async (req: Request, res: Response, next: Next
             }
         ];
 
+        //@ts-ignore
         const [result] = await TheoDoiMuonSach.aggregate(pipeline).exec();
         // console.log("Aggregation Result:", result); // Debug full result
         const total = result.metadata[0]?.total || 0;

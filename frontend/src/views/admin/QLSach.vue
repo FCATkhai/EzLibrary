@@ -141,6 +141,7 @@ const resetForm = () => {
     soQuyen.value = null;
     namXuatBan.value = null;
     file.value = null;
+    searchTermNXB.value = "";
 
     editingId.value = null;
     formStep.value = 1;

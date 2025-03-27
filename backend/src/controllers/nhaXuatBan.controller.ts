@@ -3,6 +3,8 @@ import NhaXuatBan from "../models/NhaXuatBan.model";
 import { FilterQuery } from "mongoose";
 import Sach from "../models/Sach.model";
 import generateId from "../utils/generateId.util";
+import { ITheoDoiMuonSach } from "~/shared/interface";
+import TheoDoiMuonSach from "../models/TheoDoiMuonSach.model";
 
 /**
  *  Lấy danh sách nhà xuất bản
@@ -131,6 +133,16 @@ export const deleteNhaXuatBan = async (req: Request, res: Response, next: NextFu
         }
 
         await Sach.deleteMany({maNXB: nhaXuatBan.maNXB});
+
+        // Xoá phiếu mượn của sách thuộc nhà xuất bản này
+        const phieMuons = await TheoDoiMuonSach.find({ maNXB: req.params.id});
+        if (phieMuons.some((phieMuon: ITheoDoiMuonSach) => phieMuon.trangThai === "borrowing")) {
+            res.status(400);
+            throw new Error("Không thể xóa nhà xuất bản này vì sách của nhà xuất bản này đang được mượn");
+        } else {
+            await TheoDoiMuonSach.deleteMany({ maNXB: req.params.id });
+        }
+        
         await nhaXuatBan.deleteOne();
         res.status(200).json({ message: "Nhà xuất bản đã được xóa" });
     } catch (error) {

@@ -187,10 +187,13 @@ onMounted(() => {
 <template>
     <div class="p-4">
         <h1 class="text-xl font-bold mb-4">Quản lý Độc Giả</h1>
-        <button @click="showModal('adding')" class="my-4 btn btn-success block" :disabled="loading">Thêm Độc Giả</button>
+        <button @click="showModal('adding')" class="my-4 btn btn-success block" :disabled="loading">Thêm Độc
+            Giả</button>
         <div class="flex gap-4 mb-4">
-            <button @click="fetchDocGias(true)" class=" btn btn-outline" :disabled="loading"><i class="fa-solid fa-rotate"></i>Làm mới</button>
-            <input v-model="searchTerm" placeholder="Tìm kiếm theo tên độc giả hoặc sđt..." class="input input-bordered mb-4" />
+            <button @click="fetchDocGias(true)" class=" btn btn-outline" :disabled="loading"><i
+                    class="fa-solid fa-rotate"></i>Làm mới</button>
+            <input v-model="searchTerm" placeholder="Tìm kiếm theo tên độc giả hoặc sđt..."
+                class="input input-bordered mb-4" />
         </div>
         <template v-if="loading">
             <p>Đang tải</p>
@@ -211,9 +214,12 @@ onMounted(() => {
                     <td>{{ docGia.soDienThoai }}</td>
                     <td>
                         <button @click="showInfoModal(docGia)" class="btn btn-info mr-2">Xem chi tiết</button>
-                        <button v-if="isManager" @click="showModal('editing', docGia.maDG)" class="btn btn-warning btn-sm mr-2">Sửa</button>
-                        <button @click="showResetModal(docGia.maDG)" class="btn btn-neutral btn-sm mr-2" :disabled="loading">Reset mật khẩu</button>
-                        <button @click="showDeleteModal(docGia.maDG)" class="btn btn-error btn-sm" :disabled="loading">Xóa</button>
+                        <button v-if="isManager" @click="showModal('editing', docGia.maDG)"
+                            class="btn btn-warning btn-sm mr-2">Sửa</button>
+                        <button @click="showResetModal(docGia.maDG)" class="btn btn-neutral btn-sm mr-2"
+                            :disabled="loading">Reset mật khẩu</button>
+                        <button @click="showDeleteModal(docGia.maDG)" class="btn btn-error btn-sm"
+                            :disabled="loading">Xóa</button>
                     </td>
                 </tr>
             </tbody>
@@ -234,15 +240,28 @@ onMounted(() => {
                     {{ modalStatus === "adding" ? "Thêm Độc Giả" : "Chỉnh sửa Độc Giả" }}
                 </legend>
                 <form @submit.prevent="handleSubmit">
-                    <label class="fieldset-label text-lg">Họ Lót<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="hoLot" type="text" required />
-                    <label class="fieldset-label text-lg">Tên<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="ten" type="text" required />
+                    <div class="flex gap-3">
+                        <div class="w-1/2">
+                            <label class="fieldset-label text-lg">Họ Lót<span class="text-error">*</span></label>
+                            <input class="input w-full" v-model="hoLot" type="text" required />
+                        </div>
+                        <div class="w-1/2">
+                            <label class="fieldset-label text-lg">Tên<span class="text-error">*</span></label>
+                            <input class="input w-full" v-model="ten" type="text" required />
+                        </div>
+                    </div>
                     <label class="fieldset-label text-lg">Số Điện Thoại<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="soDienThoai" type="tel" pattern="[0-9]*" oninvalid="this.setCustomValidity('Vui lòng chỉ nhập số (0-9)');"
-                    oninput="this.setCustomValidity('');" minlength="10"  maxlength="10" required />
-                    <label v-if="modalStatus == 'adding'" class="fieldset-label text-lg">Mật Khẩu<span class="text-error">*</span></label>
-                    <input v-if="modalStatus == 'adding'" class="input w-full" v-model="password" :type="modalStatus === 'adding' ? 'password' : 'text'" :required="modalStatus === 'adding'" />
+                    <input v-model="soDienThoai" type="tel" class="input validator tabular-nums w-full p-2 "
+                        pattern="[0-9]*" minlength="10" maxlength="10" title="Số điện thoại phải là 10 con số"
+                        placeholder="Nhập số điện thoại" />
+                    <p class="validator-hint">Số điện thoại phải là 10 con số</p>
+                    <label v-if="modalStatus == 'adding'" class="fieldset-label text-lg">Mật Khẩu<span
+                            class="text-error">*</span></label>
+                    <input v-if="modalStatus == 'adding'" class="input validator w-full" v-model="password"
+                        type="password" required pattern="^[A-Za-z0-9]{5,}$"
+                        title="Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt"
+                        placeholder="Nhập mật khẩu" />
+                    <p class="validator-hint">Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt</p>
                     <label class="fieldset-label text-lg">Ngày Sinh</label>
                     <input class="input w-full" v-model="ngaySinh" type="date" />
                     <label class="fieldset-label text-lg">Phái</label>
@@ -277,8 +296,11 @@ onMounted(() => {
                 <legend class="fieldset-legend text-xl departe-bold">Reset Mật Khẩu</legend>
                 <form @submit.prevent="handleResetPassword">
                     <label class="fieldset-label text-lg">Mật Khẩu Mới<span class="text-error">*</span></label>
-                    <input class="input w-full" v-model="newPassword" type="password" required placeholder="Nhập mật khẩu mới" />
-
+                    <input class="input validator w-full" v-model="newPassword" type="password" required
+                        pattern="^[A-Za-z0-9]{5,}$"
+                        title="Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt"
+                        placeholder="Nhập mật khẩu mới" />
+                    <p class="validator-hint">Mật khẩu phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt</p>
                     <p class="text-error text-xl">{{ errorMessage }}</p>
                     <div class="modal-action">
                         <div v-if="loading">
@@ -287,7 +309,8 @@ onMounted(() => {
                         </div>
                         <button class="btn btn-primary" type="submit" :disabled="loading">Reset</button>
                         <form method="dialog">
-                            <button ref="closeResetModalBtn" @click="resetPasswordForm" class="btn" :disabled="loading">Hủy</button>
+                            <button ref="closeResetModalBtn" @click="resetPasswordForm" class="btn"
+                                :disabled="loading">Hủy</button>
                         </form>
                     </div>
                 </form>
@@ -308,7 +331,8 @@ onMounted(() => {
                     </div>
                     <button class="btn btn-error" @click="handleDelete" :disabled="loading">Xóa</button>
                     <form method="dialog">
-                        <button ref="closeDeleteModalBtn" class="btn" @click="editingId = null" :disabled="loading">Hủy</button>
+                        <button ref="closeDeleteModalBtn" class="btn" @click="editingId = null"
+                            :disabled="loading">Hủy</button>
                     </form>
                 </div>
             </fieldset>
@@ -339,7 +363,9 @@ onMounted(() => {
                         </tr>
                         <tr>
                             <th>Ngày Sinh</th>
-                            <td>{{ docGiaRef.ngaySinh ? new Date(docGiaRef.ngaySinh).toLocaleDateString() : "Không có" }}</td>
+                            <td>{{ docGiaRef.ngaySinh ? new Date(docGiaRef.ngaySinh).toLocaleDateString() : "Không có"
+                                }}
+                            </td>
                         </tr>
                         <tr>
                             <th>Phái</th>
@@ -348,7 +374,8 @@ onMounted(() => {
                         <tr>
                             <th>Địa Chỉ</th>
                             <td>
-                                <textarea class="textarea w-full" rows="3" readonly>{{ docGiaRef.diaChi || "Không có" }}</textarea>
+                                <textarea class="textarea w-full" rows="3" readonly>{{ docGiaRef.diaChi || "Không có"
+                                }}</textarea>
                             </td>
                         </tr>
                     </tbody>

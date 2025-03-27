@@ -4,6 +4,8 @@ import { deleteImage } from "../middleware/upload.middleware";
 import { DEFAULT_COVER_URL } from "../config/constants";
 import { FilterQuery } from "mongoose";
 import generateId from "../utils/generateId.util";
+import TheoDoiMuonSach from "../models/TheoDoiMuonSach.model";
+import { ITheoDoiMuonSach } from "~/shared/interface";
 
 /**
  *  @route GET /api/sach
@@ -135,7 +137,6 @@ export const updateSach = async (req: Request, res: Response, next: NextFunction
         res.status(200).json({ message: "Cập nhật sách thành công", sach: updatedSach });
     } catch (error) {
                 // Check for duplicate key error (E11000)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error 
         if (error.code === 11000 || error.name === "MongoServerError" && error.code === 11000) {
             res.status(409); // Conflict status code
@@ -159,6 +160,15 @@ export const deleteSach = async (req: Request, res: Response, next: NextFunction
         }
 
         deleteImage(sach.coverUrl);
+
+        const phieMuons = await TheoDoiMuonSach.find({ maSach: req.params.id});
+        if (phieMuons.some((phieMuon: ITheoDoiMuonSach) => phieMuon.trangThai === "borrowing")) {
+            res.status(400);
+            throw new Error("Không thể xóa sách này vì sách này đang được mượn");
+        } else {
+            await TheoDoiMuonSach.deleteMany({ maSach: req.params.id });
+        }
+
         await Sach.deleteOne({ maSach: req.params.id });
         res.status(200).json({ message: "Xóa sách thành công" });
     } catch (error) {

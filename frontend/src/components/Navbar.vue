@@ -14,14 +14,20 @@
 
             <ul tabindex="0" class="dropdown-content menu z-[1] bg-base-200 p-6 rounded-box shadow w-56 gap-2">
                 <li>
-                    <RouterLink to="/About">About</RouterLink>
+                    <RouterLink to="/about">About</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/contact">Contact</RouterLink>
+                </li>
+                <li v-if="role === USER_ROLES.NHANVIEN || role === USER_ROLES.QUANLY">
+                    <RouterLink to="/admin">Quản lý</RouterLink>
                 </li>
                 <div v-if="authStore.isAuthenticated">
-                    <li>
+                    <li class="mb-2">
                         <RouterLink :to="profileLink">Hồ sơ</RouterLink>
                     </li>
-                    <li>
-                        <RouterLink @click="authStore.logout" :to="{ name: 'home' }" class="bg-red-500">Logout
+                    <li >
+                        <RouterLink @click="authStore.logout" :to="{ name: 'home' }" class="bg-error color-base text-base-100">Logout
                         </RouterLink>
                     </li>
                 </div>
@@ -32,8 +38,11 @@
         <!-- Menu for desktop -->
         <ul class="hidden menu sm:menu-horizontal gap-2">
             <li>
-                <RouterLink to="/About">About</RouterLink>
+                <RouterLink to="/About">Về chúng tôi</RouterLink>
             </li>
+            <li>
+                    <RouterLink to="/contact">Liên hệ</RouterLink>
+                </li>
             <li v-if="role === USER_ROLES.NHANVIEN || role === USER_ROLES.QUANLY">
                 <RouterLink to="/admin">Quản lý</RouterLink>
             </li>
@@ -43,15 +52,15 @@
                         <i class="fa-solid fa-user text-2xl pt-2"></i>
                     </div>
                 </div>
-                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                    <li>
+                <ul tabindex="0" class="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                    <li class="mb-2">
                         <RouterLink :to="profileLink">Hồ sơ</RouterLink>
                     </li>
                     <li v-if="role === USER_ROLES.DOCGIA">
                         <RouterLink :to="{ name: 'phieu-muon' }">Xem phiếu mượn</RouterLink>
                     </li>
                     <li>
-                        <RouterLink @click="authStore.logout" :to="{ name: 'home' }" class="bg-red-500">Logout
+                        <RouterLink @click="authStore.logout" :to="{ name: 'home' }" class="bg-error color-base text-base-100">Logout
                         </RouterLink>
                     </li>
                 </ul>

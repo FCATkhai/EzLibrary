@@ -14,9 +14,12 @@
                 </p>
                 <p class="text-gray-600">Số trang: {{ sach.soTrang }}</p>
                 <p class="text-gray-600">Năm xuất bản: {{ sach.namXuatBan }}</p>
-                <p class="text-gray-600">Mô tả: {{ sach.moTa }}</p>
+                <div>
+                    <p class="text-gray-600">Mô tả:</p>
+                    <div class="text-gray-600">{{ sach.moTa }}</div>
+                </div>
                 <p class="text-gray-600">Kho: {{ sach.soQuyen }}</p>
-                <button class="btn btn-primary mt-4 w-30" :disabled="loading || sach.soQuyen <= 0" @click="muonSach">
+                <button class="btn btn-primary mt-4 w-30" :disabled="loading || sach.soQuyen <= 0 || isNhanVien" @click="muonSach">
                     {{ loading ? "Đang xử lý..." : "Mượn sách" }}
                 </button>
                 <p v-if="sach.soQuyen <= 0">Sách đã hết, vui lòng quay lại sau</p>
@@ -33,11 +36,23 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { getSachById } from "@/api/sach.api";
 import { createPhieuMuon_DG } from "@/api/phieuMuon.api";
 import type { ISach } from "~/shared/interface";
+import { useAuthStore } from "@/stores/auth.store";
+import { USER_ROLES } from "~/shared/userRoles";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
+
+const authStore = useAuthStore();
+
+const user = authStore.user;
+const isNhanVien = computed(() => {
+    return authStore.user?.role === USER_ROLES.NHANVIEN || authStore.user?.role === USER_ROLES.QUANLY;
+});
 
 const sach = ref<ISach | null>(null);
 const route = useRoute();
@@ -54,6 +69,10 @@ onMounted(async () => {
 });
 
 const muonSach = async () => {
+    if (!user) {
+        toast.info("Vui lòng đăng nhập để mượn sách.");
+        return;
+    }
     loading.value = true;
     error.value = "";
     message.value = "";

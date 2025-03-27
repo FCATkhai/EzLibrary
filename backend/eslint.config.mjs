@@ -11,7 +11,8 @@ export default [
     ...tseslint.configs.recommended,
     {
         rules: {
-            "@typescript-eslint/no-require-imports": "off"
+            "@typescript-eslint/no-require-imports": "off",
+            "@typescript-eslint/ban-ts-comment": "off"
         }
     },
 

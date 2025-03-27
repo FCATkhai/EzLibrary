@@ -26,11 +26,20 @@ const routes = [
         }
     },
     {
+        path: '/contact',
+        name: 'contact',
+        component: () => import('@/views/ContactView.vue'),
+        meta: {
+            layout: AppLayout
+        }
+    },
+    {
         path: '/phieu-muon',
         name: 'phieu-muon',
         component: () => import('@/views/PhieuMuonView.vue'),
         meta: {
-            layout: AppLayout
+            layout: AppLayout,
+            requiresAuth: true
         }
     },
     {
@@ -38,7 +47,8 @@ const routes = [
         name: 'user-profile',
         component: () => import('@/views/UserProfileView.vue'),
         meta: {
-            layout: AppLayout
+            layout: AppLayout,
+            requiresAuth: true
         }
     },
     {

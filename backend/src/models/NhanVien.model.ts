@@ -5,10 +5,10 @@ import bcrypt from 'bcryptjs';
 const NhanVienSchema: Schema = new Schema<INhanVien>({
     maNV: { type: String, required: true, unique: true },
     hoTenNV: { type: String, required: true },
+    soDienThoai: { type: String, required: true , unique: true},
     password: { type: String, required: true },
     chucVu: { type: String, required: true, enum: ["Quản lý", "Nhân viên"] },
     diaChi: { type: String, required: true },
-    soDienThoai: { type: String, required: true , unique: true},
 });
 
 /** Hash password before saving */
